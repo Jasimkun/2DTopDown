@@ -1,19 +1,24 @@
 using UnityEngine;
 
-public class TimeBoostItem : MonoBehaviour
+public class PlusTimeItem : MonoBehaviour
 {
-    public float timeIncrease = 5f; // 증가할 시간
+    [SerializeField] PlusTimeItemData data;
 
-    private void OnTriggerEnter(Collider other)
+    public float GetTimeToAdd()
     {
-        if (other.CompareTag("Player")) // 플레이어와 충돌했을 때만 작동
+        return data.timeToAdd;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
         {
-            GameTimer gameTimer = FindObjectOfType<GameTimer>();
-            if (gameTimer != null)
+            GameTimer timer = FindObjectOfType<GameTimer>();
+            if (timer != null)
             {
-                gameTimer.AddTime(timeIncrease); // 시간 증가
-                Destroy(gameObject); // 아이템 제거
+                timer.AddTime(GetTimeToAdd());
             }
+            Destroy(gameObject);
         }
     }
 }

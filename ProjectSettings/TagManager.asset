@@ -12,8 +12,8 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
+  - Player
+  - Item
   - 
   - 
   - 
@@ -50,6 +50,9 @@ TagManager:
     locked: 0
   - name: Door
     uniqueID: 445201869
+    locked: 0
+  - name: Item
+    uniqueID: 2922274265
     locked: 0
   - name: Player
     uniqueID: 4005166315
