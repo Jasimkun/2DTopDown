@@ -63,7 +63,7 @@ public class Player : MonoBehaviour
 
             if (currentTile == bossGroundTile)
             {
-                SceneManager.LoadScene("Clear");
+                SceneManager.LoadScene("Test2");
 
             }
         }

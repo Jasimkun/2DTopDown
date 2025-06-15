@@ -15,11 +15,11 @@ public class PlusTimeItem : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            GameTimer timer = FindObjectOfType<GameTimer>();
-            if (timer != null)
-            {
-                timer.AddTime(GetTimeToAdd());
-            }
+            //GameTimer timer = FindObjectOfType<GameTimer>();
+            //if (timer != null)
+            //{
+                //timer.AddTime(GetTimeToAdd());
+            //}
 
             InventorySystem inventory = FindObjectOfType<InventorySystem>();
             if (inventory != null)

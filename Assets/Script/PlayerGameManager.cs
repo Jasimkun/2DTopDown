@@ -30,6 +30,6 @@ public class PlayerGameManager : MonoBehaviour
 
         Debug.Log("플레이어 이름이 저장되었습니다 : " + playerName);
 
-        SceneManager.LoadScene("Test");
+        SceneManager.LoadScene("Test1");
     }
 }

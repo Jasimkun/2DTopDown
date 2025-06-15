@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeToAdd: 5
   point: 0
+  itemName: 
+  icon: {fileID: 21300000, guid: 2495ce8068c5d0e4d99a0c4eebd43e5e, type: 3}
