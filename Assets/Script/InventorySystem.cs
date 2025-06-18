@@ -160,28 +160,28 @@ public class InventorySystem : MonoBehaviour
     }
 
     // --- 여기에 아이템 제거 메서드 추가 ---
-    public void RemoveItem(string itemName) //
-    {
-        int initialCount = items.Count;
+    //public void RemoveItem(string itemName) //
+    //{
+        //int initialCount = items.Count;
         // itemName과 일치하는 모든 아이템을 제거 (현재는 1개만 있을 것이므로 사실상 1개 제거)
-        items.RemoveAll(i => i.itemName == itemName);
+        //items.RemoveAll(i => i.itemName == itemName);
 
-        if (items.Count < initialCount) // 아이템이 실제로 제거되었다면
-        {
-            SaveInventory(); // 제거 후 즉시 저장
-            Debug.Log($"[인벤토리] 아이템이 인벤토리에서 제거되고 저장되었습니다.");
+        //if (items.Count < initialCount) // 아이템이 실제로 제거되었다면
+        //{
+            //SaveInventory(); // 제거 후 즉시 저장
+            //Debug.Log($"[인벤토리] 아이템이 인벤토리에서 제거되고 저장되었습니다.");
 
             // UI 갱신 (퀵 슬롯에서 아이템이 사라지도록)
-            if (quickSlotUIController != null)
-            {
-                quickSlotUIController.RefreshQuickSlotsUI();
-            }
-        }
-        else
-        {
-            Debug.LogWarning($"[인벤토리] '{itemName}' 아이템을 인벤토리에서 찾을 수 없어 제거할 수 없습니다.");
-        }
-    }
+            //if (quickSlotUIController != null)
+            //{
+                //quickSlotUIController.RefreshQuickSlotsUI();
+            //}
+        //}
+        //else
+        //{
+            //Debug.LogWarning($"[인벤토리] '{itemName}' 아이템을 인벤토리에서 찾을 수 없어 제거할 수 없습니다.");
+        //}
+    //}
     // 퀵 슬롯 버튼 클릭 시 호출될 아이템 사용 메서드
     public void UseInventoryItem(int quickSlotIndex)
     {
@@ -278,7 +278,7 @@ public class InventorySystem : MonoBehaviour
                     {
                         Debug.LogWarning("씬에서 'GameTimer' 스크립트를 찾을 수 없습니다. 시간을 추가할 수 없습니다.");
                     }
-                    RemoveItem(itemData.itemName);
+                    //RemoveItem(itemData.itemName);
                 };
             }
         }

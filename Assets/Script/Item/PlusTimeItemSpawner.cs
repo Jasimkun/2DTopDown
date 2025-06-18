@@ -19,7 +19,7 @@ public class PlusTimeItemSpawner : MonoBehaviour
 
     IEnumerator SpawnItemDelayed()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.2f);
 
         List<Vector3Int> validPositions = new List<Vector3Int>();
         BoundsInt bounds = groundTilemap.cellBounds;
@@ -40,11 +40,11 @@ public class PlusTimeItemSpawner : MonoBehaviour
             Vector3Int randomCell = validPositions[Random.Range(0, validPositions.Count)];
             Vector3 spawnPos = groundTilemap.CellToWorld(randomCell) + new Vector3(0.5f, 0.5f, -0.1f);
             Instantiate(PlusTimeItemPrefab, spawnPos, Quaternion.identity);
-            Debug.Log("어딘가에 아이템이 생성된 것 같아.");
+            //Debug.Log("어딘가에 아이템이 생성된 것 같아.");
         }
         else
         {
-            Debug.LogWarning("적절한 타일 위치를 찾지 못했습니다.");
+            //Debug.LogWarning("적절한 타일 위치를 찾지 못했습니다.");
         }
     }
 }

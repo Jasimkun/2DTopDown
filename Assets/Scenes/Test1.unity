@@ -331,6 +331,7 @@ GameObject:
   m_Component:
   - component: {fileID: 154514736}
   - component: {fileID: 154514737}
+  - component: {fileID: 154514738}
   m_Layer: 0
   m_Name: "\uC81C\uBAA9 \uC5C6\uC74C-1"
   m_TagString: Untagged
@@ -405,6 +406,18 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &154514738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 154514735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05a3c72903294d14b9c429d94fd2db1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &225394087
 GameObject:
   m_ObjectHideFlags: 0
@@ -1350,16 +1363,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 675593525}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1929642331649254b8f6a0ce3618054f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  groundTilemap: {fileID: 1723917991}
-  wallTilemap: {fileID: 1030950837}
-  groundTile: {fileID: 11400000, guid: ed7e408237de64c57abab945a099b673, type: 2}
-  wallTile: {fileID: 11400000, guid: 81c4b33e3b055d14b9e3e201f9dbb8d7, type: 2}
-  mazeGridSize: 2
+  GroundPrefab: {fileID: 6943569309032983212, guid: bb810512f8b5ea14da626be5eb723d03, type: 3}
+  WallPrefab: {fileID: 6829274732165044123, guid: aca88431fb644ef448c462ae8f48ceca, type: 3}
+  width: 10
+  height: 10
+  tileRatio: 1
 --- !u!1 &683006253
 GameObject:
   m_ObjectHideFlags: 0

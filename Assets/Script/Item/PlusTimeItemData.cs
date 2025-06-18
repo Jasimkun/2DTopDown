@@ -23,7 +23,7 @@ public class PlusTimeItemData : ScriptableObject
         }
         else
         {
-            Debug.LogWarning($"아이템 '{itemName}'에 대한 사용 효과가 정의되지 않았습니다.");
+            //Debug.LogWarning($"아이템 '{itemName}'에 대한 사용 효과가 정의되지 않았습니다.");
         }
     }
 }

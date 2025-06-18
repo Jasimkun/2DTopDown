@@ -81,7 +81,7 @@ public class QuickSlotUIController : MonoBehaviour
                 {
                     currentImage.sprite = itemData.icon; // PlusTimeItemData에 icon 필드가 있다고 가정
                     currentImage.color = Color.white;
-                    currentText.text = invItem.count.ToString();
+                    //currentText.text = invItem.count.ToString();
                     currentButton.interactable = true; // 아이템이 있으면 버튼 활성화
                 }
                 else

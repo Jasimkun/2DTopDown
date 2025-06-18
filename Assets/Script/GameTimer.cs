@@ -33,10 +33,10 @@ public class GameTimer : MonoBehaviour
         }
 
         // 스페이스바 치트키: +5초
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            AddTime(5f);
-        }
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+            //AddTime(5f);
+        //}
     }
 
     //치트키
