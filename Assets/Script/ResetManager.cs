@@ -63,14 +63,14 @@ public class ResetManager : MonoBehaviour
         {
             // InventorySystem의 ResetInventoryData() 메서드를 호출
             //inventorySystem.ResetInventoryData(); // 이 메서드가 InventorySystem에서 Clear() 및 파일 삭제, UI 갱신을 담당
-            Debug.Log("인벤토리 시스템이 초기화 요청되었습니다.");
+            //Debug.Log("인벤토리 시스템이 초기화 요청되었습니다.");
         }
         else
         {
             Debug.LogWarning("InventorySystem을 찾을 수 없어 인벤토리를 초기화할 수 없습니다.");
         }
 
-        Debug.Log("모든 게임 데이터 초기화가 완료되었습니다! 게임을 재시작해야 합니다.");
+        //Debug.Log("모든 게임 데이터 초기화가 완료되었습니다! 게임을 재시작해야 합니다.");
 
         // 모든 데이터가 초기화된 후, 일반적으로는 게임을 메인 메뉴로 돌리거나 재시작합니다.
         // SceneManager.LoadScene("MainMenuScene"); // 예시: SceneManager를 사용하려면 using UnityEngine.SceneManagement; 필요

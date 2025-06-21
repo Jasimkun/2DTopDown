@@ -1853,7 +1853,7 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 0
+        m_CallState: 2
       - m_Target: {fileID: 1754347598}
         m_TargetAssemblyTypeName: InventorySystem, Assembly-CSharp
         m_MethodName: RemoveItem

@@ -48,7 +48,12 @@ public class GameTimer : MonoBehaviour
     void UpdateTimerUI()
     {
         if (timerText != null)
-            timerText.text = Mathf.CeilToInt(currentTime).ToString();
+        {
+            // Mathf.Max를 사용하여 시간이 음수가 되는 것을 방지하고 최소 0으로 표시
+            float displayTime = Mathf.Max(0f, currentTime);
+            // "F2" 포맷팅: 소수점 이하 두 자리까지 표시 (예: 9.99)
+            timerText.text = displayTime.ToString("F2");
+        }
     }
 
     void GameOver()
@@ -58,6 +63,6 @@ public class GameTimer : MonoBehaviour
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
 
-        Debug.Log("Game Over!");
+        //Debug.Log("Game Over!");
     }
 }
