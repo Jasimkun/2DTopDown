@@ -1,39 +1,28 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System; // Action ë¸ë¦¬ê²Œì´íŠ¸ ì‚¬ìš©ì„ ìœ„í•´
 
-[System.Serializable]
-public class Item
-{
-    public string itemName;
-    public int itemID;
-}
-
-[System.Serializable]
-public class InventoryData
-{
-    public List<Item> items = new List<Item>();
-}
-
+// InventoryItem í´ë˜ìŠ¤ëŠ” ê·¸ëŒ€ë¡œ ìœ ì§€ë©ë‹ˆë‹¤.
 [System.Serializable]
 public class InventoryItem
 {
-    public string itemName;  // PlusTimeItemDataÀÇ itemName°ú µ¿ÀÏÇØ¾ß ÇÔ
+    public string itemName;
     public int count;
 
-    [System.NonSerialized] // ÀÌ ÇÊµå´Â JSON ÀúÀå ½Ã Á¦¿Ü (¾À¸¶´Ù ÃÊ±âÈ­µÇ¾î¾ß ÇÔ)
-    public bool usedInCurrentScene; // ÀÌ ¾À¿¡¼­ »ç¿ëµÇ¾ú´ÂÁö ¿©ºÎ
+    [System.NonSerialized]
+    public bool usedInCurrentScene;
 
     public InventoryItem(string name)
     {
         itemName = name;
         count = 1;
-        usedInCurrentScene = false; // [Ãß°¡] ÃÊ±âÈ­ ½Ã false·Î ¼³Á¤
+        usedInCurrentScene = false;
     }
 }
 
-// ÀüÃ¼ ÀÎº¥Åä¸® µ¥ÀÌÅÍ¸¦ JSONÀ¸·Î ÀúÀåÇÏ±â À§ÇÑ ÄÁÅ×ÀÌ³Ê
+// ì¸ë²¤í† ë¦¬ ì €ì¥ìš© ë˜í¼ í´ë˜ìŠ¤ëŠ” ê·¸ëŒ€ë¡œ ìœ ì§€ë©ë‹ˆë‹¤.
 [System.Serializable]
 public class InventorySaveData
 {
@@ -50,196 +39,186 @@ public class InventorySystem : MonoBehaviour
     public static InventorySystem Instance { get; private set; }
     public List<InventoryItem> items = new List<InventoryItem>();
 
-    // ¿¡µğÅÍ¿¡¼­ ¾ÆÀÌÅÛ µ¥ÀÌÅÍ ÀüºÎ ³Ö¾î³õ±â
-    public List<PlusTimeItemData> allItemData;
+    // â¬‡ï¸ [ìˆ˜ì •] ëª¨ë“  ì•„ì´í…œ ë°ì´í„°ë¥¼ BaseItemData íƒ€ì…ìœ¼ë¡œ ì €ì¥í•©ë‹ˆë‹¤.
+    // ì—ë””í„°ì—ì„œ ëª¨ë“  PlusTimeItemDataì™€ LightItemData ì—ì…‹ì„ ì—¬ê¸°ì— í• ë‹¹í•˜ì„¸ìš”.
+    public List<BaseItemData> allItemData;
 
     private string savePath;
     private QuickSlotUIController quickSlotUIController;
+    private GameObject playerGameObject; // â¬‡ï¸ [ì¶”ê°€] í”Œë ˆì´ì–´ GameObjectë¥¼ ì €ì¥í•  ë³€ìˆ˜
 
     private void Awake()
     {
-        // --- [¼öÁ¤] ½Ì±ÛÅæ ÀÎ½ºÅÏ½º ÃÊ±âÈ­ ¹× DontDestroyOnLoad Àû¿ë ---
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // ÀÌ °ÔÀÓ ¿ÀºêÁ§Æ®¸¦ ¾À ÀüÈ¯ ½Ã ÆÄ±«ÇÏÁö ¾ÊÀ½
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
             return;
         }
-        // --- DontDestroyOnLoad Àû¿ë ³¡ ---
 
         savePath = Application.persistentDataPath + "/inventory.json";
-
-        // [¼öÁ¤] Awake¿¡¼­´Â QuickSlotUIController¸¦ Ã£Áö ¾Ê½À´Ï´Ù. OnSceneLoaded¿¡¼­ ¸Å ¾À ·Îµå ½Ã¸¶´Ù ¿¬°áÇÒ °ÍÀÔ´Ï´Ù.
-        // quickSlotUIController = FindObjectOfType<QuickSlotUIController>();
-        // if (quickSlotUIController == null)
-        // {
-        //     Debug.LogWarning("¾À¿¡ QuickSlotUIController°¡ ¾ø½À´Ï´Ù. Äü ½½·Ô UI¸¦ °»½ÅÇÒ ¼ö ¾ø½À´Ï´Ù.");
-        // }
-
-        LoadInventory(); // °ÔÀÓ ½ÃÀÛ ½Ã ÀúÀåµÈ ÀÎº¥Åä¸® ºÒ·¯¿À±â
+        LoadInventory();
     }
-    // --- [Ãß°¡] OnEnable/OnDisable ¹× OnSceneLoaded ¸Ş¼­µå ---
+
     void OnEnable()
     {
-        SceneManager.sceneLoaded += OnSceneLoaded; // ¾À ·ÎµåµÉ ¶§¸¶´Ù ÀÌº¥Æ® ±¸µ¶
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     void OnDisable()
     {
-        SceneManager.sceneLoaded -= OnSceneLoaded; // ¿ÀºêÁ§Æ® ºñÈ°¼ºÈ­ ¶Ç´Â ÆÄ±« ½Ã ÀÌº¥Æ® ±¸µ¶ ÇØÁ¦
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        //Debug.Log($"[InventorySystem] ¾À '{scene.name}' ·Îµå ¿Ï·á.");
-
-        // --- [Ãß°¡] Áß¿ä: ¾À ·Îµå ½Ã ¸ğµç ¾ÆÀÌÅÛÀÇ »ç¿ë ±â·Ï ÃÊ±âÈ­ ---
+        // ì”¬ ë¡œë“œ ì‹œ ëª¨ë“  ì•„ì´í…œì˜ ì‚¬ìš© ê¸°ë¡ ì´ˆê¸°í™”
         foreach (var item in items)
         {
             item.usedInCurrentScene = false;
-            //Debug.Log($"[InventorySystem] ¾ÆÀÌÅÛ '{item.itemName}'ÀÇ ¾À »ç¿ë ±â·Ï ÃÊ±âÈ­µÊ.");
         }
-        // --- ÃÊ±âÈ­ ³¡ ---
 
-        // »õ ¾ÀÀÌ ·ÎµåµÉ ¶§¸¶´Ù QuickSlotUIController¸¦ ´Ù½Ã Ã£¾Æ ¿¬°áÇÕ´Ï´Ù.
+        // ìƒˆ ì”¬ì´ ë¡œë“œë  ë•Œë§ˆë‹¤ í•„ìš”í•œ ì»´í¬ë„ŒíŠ¸ë“¤ì„ ë‹¤ì‹œ ì°¾ì•„ ì—°ê²°í•©ë‹ˆë‹¤.
         quickSlotUIController = FindObjectOfType<QuickSlotUIController>();
         if (quickSlotUIController != null)
         {
-            quickSlotUIController.RefreshQuickSlotsUI(); // Äü½½·Ô UI¸¦ ´Ù½Ã °»½ÅÇÏ¿© ÇöÀç ÀÎº¥Åä¸® »óÅÂ ¹İ¿µ
-            
+            quickSlotUIController.RefreshQuickSlotsUI();
         }
         else
         {
-            Debug.LogWarning($"[InventorySystem] ¾À '{scene.name}'¿¡¼­ QuickSlotUIController¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogWarning($"[InventorySystem] ì”¬ '{scene.name}'ì—ì„œ QuickSlotUIControllerë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+        }
+
+        // â¬‡ï¸ [ì¶”ê°€] ì”¬ ë¡œë“œ ì‹œ í”Œë ˆì´ì–´ GameObjectë¥¼ ë‹¤ì‹œ ì°¾ìŠµë‹ˆë‹¤.
+        // í”Œë ˆì´ì–´ì— "Player" íƒœê·¸ê°€ ë¶™ì–´ìˆë‹¤ê³  ê°€ì •í•©ë‹ˆë‹¤.
+        GameObject foundPlayer = GameObject.FindGameObjectWithTag("Player");
+        if (foundPlayer != null)
+        {
+            playerGameObject = foundPlayer;
+        }
+        else
+        {
+            Debug.LogWarning($"[InventorySystem] ì”¬ '{scene.name}'ì—ì„œ 'Player' íƒœê·¸ë¥¼ ê°€ì§„ GameObjectë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ì•„ì´í…œ íš¨ê³¼ ì ìš©ì— ë¬¸ì œê°€ ìˆì„ ìˆ˜ ìˆìŠµë‹ˆë‹¤.");
+            playerGameObject = null;
         }
     }
-    // --- OnEnable/OnDisable ¹× OnSceneLoaded ¸Ş¼­µå ³¡ ---
 
-
-    // ¾ÆÀÌÅÛ Ãß°¡ (ÇÑ ¹ø ¸ÔÀº ¾ÆÀÌÅÛÀº ´Ù½Ã Ãß°¡ ¾È ÇÔ)
-    public void AddItem(PlusTimeItemData itemData)
+    /// <summary>
+    /// ì¸ë²¤í† ë¦¬ì— ì•„ì´í…œì„ ì¶”ê°€í•©ë‹ˆë‹¤. BaseItemData íƒ€ì…ì„ ë°›ë„ë¡ ì¼ë°˜í™”ë˜ì—ˆìŠµë‹ˆë‹¤.
+    /// </summary>
+    /// <param name="itemData">ì¶”ê°€í•  ì•„ì´í…œ ë°ì´í„° (BaseItemData ìƒì†)</param>
+    public void AddItem(BaseItemData itemData) // â¬‡ï¸ [ìˆ˜ì •] PlusTimeItemData -> BaseItemDataë¡œ ë³€ê²½
     {
+        if (itemData == null)
+        {
+            Debug.LogWarning("ì¶”ê°€í•˜ë ¤ëŠ” ì•„ì´í…œ ë°ì´í„°ê°€ nullì…ë‹ˆë‹¤.", this);
+            return;
+        }
+
+        // ì¸ë²¤í† ë¦¬ ì•„ì´í…œ ëª©ë¡ì— ì´ë¯¸ ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸ (ì´ë¦„ìœ¼ë¡œ)
         InventoryItem existing = items.Find(i => i.itemName == itemData.itemName);
         if (existing != null)
         {
-            Debug.Log($"ÀÌ¹Ì ÀÎº¥Åä¸®¿¡ Á¸ÀçÇÏ´Â ¾ÆÀÌÅÛÀÌ¾ß.");
-            return; // ÀÌ¹Ì ÀÖ´Â ¾ÆÀÌÅÛÀº Ãß°¡ÇÏÁö ¾Ê°í ÀúÀåÇÏÁöµµ ¾ÊÀ½
+            // í•œ ë²ˆ ë¨¹ì€ ì•„ì´í…œì€ ë‹¤ì‹œ ì¶”ê°€ ì•ˆ í•¨ (ê°œìˆ˜ ì¦ê°€ ë¡œì§ì´ í•„ìš”í•˜ë‹¤ë©´ ì—¬ê¸° ìˆ˜ì •)
+            Debug.Log($"ì´ë¯¸ ì¸ë²¤í† ë¦¬ì— ì¡´ì¬í•˜ëŠ” ì•„ì´í…œì´ì•¼.");
+            return;
         }
         else
         {
+            // ìƒˆë¡œìš´ InventoryItem ì¸ìŠ¤í„´ìŠ¤ ìƒì„± ë° ì¶”ê°€
             items.Add(new InventoryItem(itemData.itemName));
-            SaveInventory();
-            Debug.Log($"...¾ÆÀÌÅÛÀ» ÀÎº¥Åä¸®¿¡ ÀúÀåÇß¾î.");
+            SaveInventory(); // ì¸ë²¤í† ë¦¬ ë³€ê²½ ì‚¬í•­ ì €ì¥
+            Debug.Log($"ìƒˆë¡œìš´ ì•„ì´í…œì„ ì¸ë²¤í† ë¦¬ì— ì €ì¥í–ˆì–´.");
 
-            itemData.OnUseItem = () =>
+            // â¬‡ï¸ [ìˆ˜ì •] BaseItemDataì˜ OnUseItem ë¸ë¦¬ê²Œì´íŠ¸ ì—°ê²° (plusTimeItemDataì—ë§Œ ì—°ê²°)
+            // LightItemDataëŠ” OnUseItem ë¸ë¦¬ê²Œì´íŠ¸ë¥¼ ì‚¬ìš©í•˜ì§€ ì•Šìœ¼ë¯€ë¡œ (ApplyEffectë¥¼ ì§ì ‘ í˜¸ì¶œ)
+            // PlusTimeItemData íƒ€ì…ì¼ ê²½ìš°ì—ë§Œ í•´ë‹¹ ë¸ë¦¬ê²Œì´íŠ¸ë¥¼ ì—°ê²°í•©ë‹ˆë‹¤.
+            if (itemData is PlusTimeItemData plusTimeData)
             {
-                Debug.Log($" ¾ÆÀÌÅÛÀ» »ç¿ëÇß¾î. ½Ã°£ÀÌ {itemData.timeToAdd}ÃÊ Ãß°¡µÈ °Í °°¾Æ.");
-                GameTimer timer = FindObjectOfType<GameTimer>();
-                if (timer != null)
+                plusTimeData.OnUseItem = () =>
                 {
-                    timer.AddTime(itemData.timeToAdd);
-                }
-                else
-                {
-                    Debug.LogWarning("¾À¿¡¼­ 'GameTimer' ½ºÅ©¸³Æ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù. ½Ã°£À» Ãß°¡ÇÒ ¼ö ¾ø½À´Ï´Ù.");
-                }
-                //RemoveItem(itemData.itemName); // »ç¿ë ÈÄ Á¦°Å
-            };
-            // --- Ãß°¡ ³¡ ---
+                    Debug.Log($"'{plusTimeData.itemName}' ì•„ì´í…œì„ ì‚¬ìš©í–ˆì–´. ì‹œê°„ì´ {plusTimeData.timeToAdd}ì´ˆ ì¶”ê°€ëœ ê²ƒ ê°™ì•„.");
+                    GameTimer timer = FindObjectOfType<GameTimer>(); // ì”¬ì—ì„œ íƒ€ì´ë¨¸ë¥¼ ì°¾ì•„ ì‹œê°„ì„ ì¶”ê°€
+                    if (timer != null)
+                    {
+                        timer.AddTime(plusTimeData.timeToAdd);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("ì”¬ì—ì„œ 'GameTimer' ìŠ¤í¬ë¦½íŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ì‹œê°„ì„ ì¶”ê°€í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+                    }
+                    // ì•„ì´í…œ ì‚¬ìš© í›„ ì œê±° (í•„ìš”í•˜ë‹¤ë©´)
+                    // RemoveItem(plusTimeData.itemName);
+                };
+            }
+            // â¬‡ï¸ [ì¶”ê°€] LightItemDataëŠ” AddItem ì‹œ ë³„ë„ì˜ OnUseItem ì—°ê²° í•„ìš” ì—†ìŒ (UseItemEffect ë‚´ë¶€ì—ì„œ ì§ì ‘ íš¨ê³¼ ì ìš©)
 
+            // UI ê°±ì‹  (í€µ ìŠ¬ë¡¯ì— ìƒˆ ì•„ì´í…œì´ ì¶”ê°€ë˜ë„ë¡)
             if (quickSlotUIController != null)
             {
                 quickSlotUIController.RefreshQuickSlotsUI();
             }
-
         }
     }
 
-    // --- ¿©±â¿¡ ¾ÆÀÌÅÛ Á¦°Å ¸Ş¼­µå Ãß°¡ ---
-    //public void RemoveItem(string itemName) //
-    //{
-        //int initialCount = items.Count;
-        // itemName°ú ÀÏÄ¡ÇÏ´Â ¸ğµç ¾ÆÀÌÅÛÀ» Á¦°Å (ÇöÀç´Â 1°³¸¸ ÀÖÀ» °ÍÀÌ¹Ç·Î »ç½Ç»ó 1°³ Á¦°Å)
-        //items.RemoveAll(i => i.itemName == itemName);
-
-        //if (items.Count < initialCount) // ¾ÆÀÌÅÛÀÌ ½ÇÁ¦·Î Á¦°ÅµÇ¾ú´Ù¸é
-        //{
-            //SaveInventory(); // Á¦°Å ÈÄ Áï½Ã ÀúÀå
-            //Debug.Log($"[ÀÎº¥Åä¸®] ¾ÆÀÌÅÛÀÌ ÀÎº¥Åä¸®¿¡¼­ Á¦°ÅµÇ°í ÀúÀåµÇ¾ú½À´Ï´Ù.");
-
-            // UI °»½Å (Äü ½½·Ô¿¡¼­ ¾ÆÀÌÅÛÀÌ »ç¶óÁöµµ·Ï)
-            //if (quickSlotUIController != null)
-            //{
-                //quickSlotUIController.RefreshQuickSlotsUI();
-            //}
-        //}
-        //else
-        //{
-            //Debug.LogWarning($"[ÀÎº¥Åä¸®] '{itemName}' ¾ÆÀÌÅÛÀ» ÀÎº¥Åä¸®¿¡¼­ Ã£À» ¼ö ¾ø¾î Á¦°ÅÇÒ ¼ö ¾ø½À´Ï´Ù.");
-        //}
-    //}
-    // Äü ½½·Ô ¹öÆ° Å¬¸¯ ½Ã È£ÃâµÉ ¾ÆÀÌÅÛ »ç¿ë ¸Ş¼­µå
+    /// <summary>
+    /// ì¸ë²¤í† ë¦¬ì—ì„œ ì•„ì´í…œì„ ì‚¬ìš©í•©ë‹ˆë‹¤.
+    /// </summary>
+    /// <param name="quickSlotIndex">í€µ ìŠ¬ë¡¯ UIì˜ ì¸ë±ìŠ¤ì…ë‹ˆë‹¤.</param>
     public void UseInventoryItem(int quickSlotIndex)
     {
-        // quickSlotIndex´Â Äü ½½·Ô UIÀÇ ÀÎµ¦½ºÀÌ¸ç, ÀÎº¥Åä¸® ListÀÇ ÀÎµ¦½º¿Í µ¿ÀÏÇÏ´Ù°í °¡Á¤ÇÕ´Ï´Ù.
         if (quickSlotIndex >= 0 && quickSlotIndex < items.Count)
         {
             InventoryItem invItem = items[quickSlotIndex];
-            PlusTimeItemData itemData = GetItemDataByName(invItem.itemName);
+            BaseItemData itemData = GetItemDataByName(invItem.itemName); // â¬‡ï¸ [ìˆ˜ì •] BaseItemDataë¡œ ë°›ìŒ
 
-            // --- [Ãß°¡] ÇöÀç ¾À¿¡¼­ ÀÌ¹Ì »ç¿ëµÇ¾ú´ÂÁö È®ÀÎ ---
             if (invItem.usedInCurrentScene)
             {
-                Debug.Log($"¾ÆÀÌÅÛÀº ¸Ê¸¶´Ù ÇÑ ¹ø¾¿¸¸ »ç¿ëÇÒ ¼ö ÀÖ´Â °Í °°¾Æ.");
-                return; // »ç¿ë ºÒ°¡
+                Debug.Log($"'{invItem.itemName}' ì•„ì´í…œì€ ë§µë§ˆë‹¤ í•œ ë²ˆì”©ë§Œ ì‚¬ìš©í•  ìˆ˜ ìˆëŠ” ê²ƒ ê°™ì•„.");
+                return;
             }
-            // --- Ãß°¡ ³¡ ---
 
             if (itemData != null)
             {
-                //Debug.Log($"[ÀÎº¥Åä¸®] Äü ½½·Ô {quickSlotIndex}ÀÇ '{itemData.itemName}' ¾ÆÀÌÅÛ »ç¿ë ½Ãµµ.");
-                itemData.UseItemEffect(); // PlusTimeItemData¿¡ Á¤ÀÇµÈ È¿°ú ½ÇÇà
-                // --- [Ãß°¡] ¾ÆÀÌÅÛ »ç¿ë ÈÄ ÇöÀç ¾À »ç¿ë ±â·Ï ¼³Á¤ ---
-                // ¾ÆÀÌÅÛÀÌ ÀÎº¥Åä¸®¿¡¼­ 'Á¦°ÅµÇÁö ¾Ê°í' ¾À ´ç 1È¸ »ç¿ë Á¦ÇÑ¸¸ °É¸®´Â °æ¿ì¿¡ ¾Æ·¡ ÄÚµå¸¦ È°¼ºÈ­ÇÏ¼¼¿ä.
-                // ¸¸¾à ¾ÆÀÌÅÛ »ç¿ë Áï½Ã ÀÎº¥Åä¸®¿¡¼­ Á¦°ÅµÈ´Ù¸é (RemoveItem È£Ãâ), ÀÌ ºÎºĞÀº ÇÊ¿ä ¾ø½À´Ï´Ù.
-                // invItem.usedInCurrentScene = true;
-                // SaveInventory(); // »ç¿ë ±â·Ï º¯°æ ½Ã ÀúÀå (ÇÊ¿ä½Ã)
-                // Debug.Log($"[ÀÎº¥Åä¸®] '{invItem.itemName}' ¾À »ç¿ë ±â·Ï: true·Î ¼³Á¤.");
-                // --- Ãß°¡ ³¡ ---
-                invItem.usedInCurrentScene = true;
+                if (playerGameObject == null)
+                {
+                    playerGameObject = GameObject.FindGameObjectWithTag("Player"); // í”Œë ˆì´ì–´ ë‹¤ì‹œ ì°¾ê¸° ì‹œë„
+                }
 
-                // UI °»½Å (usedInCurrentScene »óÅÂ º¯È­¸¦ ¹İ¿µÇÏ±â À§ÇØ ÇÊ¿ä)
-                // ÇöÀç´Â RemoveItemÀÌ RefreshQuickSlotsUI¸¦ È£ÃâÇÏ¹Ç·Î Áßº¹µÉ ¼ö ÀÖ½À´Ï´Ù.
+                // â¬‡ï¸ [ìˆ˜ì •] BaseItemDataì˜ UseItemEffect ë©”ì„œë“œ í˜¸ì¶œ ì‹œ í”Œë ˆì´ì–´ GameObject ì „ë‹¬
+                // ê° ì•„ì´í…œ ë°ì´í„°ì˜ UseItemEffectëŠ” ì˜¤ë²„ë¼ì´ë“œë˜ì–´ í•´ë‹¹ ì•„ì´í…œì˜ ê³ ìœ í•œ íš¨ê³¼ë¥¼ ì‹¤í–‰í•©ë‹ˆë‹¤.
+                itemData.UseItemEffect(playerGameObject); // playerGameObjectë¥¼ userë¡œ ì „ë‹¬
+
+                invItem.usedInCurrentScene = true; // í˜„ì¬ ì”¬ì—ì„œ ì‚¬ìš©ë¨ìœ¼ë¡œ í‘œì‹œ
+
+                // UI ê°±ì‹  (ì•„ì´í…œ ì‚¬ìš© ìƒíƒœ ë³€í™”ë¥¼ ë°˜ì˜)
                 if (quickSlotUIController != null)
                 {
                     quickSlotUIController.RefreshQuickSlotsUI();
                 }
-                // RemoveItemÀº UseItemEffect ³»ºÎ¿¡¼­ È£ÃâµÇ¹Ç·Î ¿©±â¼­ µû·Î È£ÃâÇÏÁö ¾Ê½À´Ï´Ù.
             }
             else
             {
-                Debug.LogWarning($"[ÀÎº¥Åä¸®] ½½·Ô {quickSlotIndex}ÀÇ ¾ÆÀÌÅÛ µ¥ÀÌÅÍ('{invItem.itemName}')¸¦ Ã£À» ¼ö ¾ø¾î »ç¿ëÇÒ ¼ö ¾ø½À´Ï´Ù.");
+                Debug.LogWarning($"[ì¸ë²¤í† ë¦¬] ìŠ¬ë¡¯ {quickSlotIndex}ì˜ ì•„ì´í…œ ë°ì´í„°('{invItem.itemName}')ë¥¼ ì°¾ì„ ìˆ˜ ì—†ì–´ ì‚¬ìš©í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             }
         }
         else
         {
-            Debug.LogWarning($"[ÀÎº¥Åä¸®] À¯È¿ÇÏÁö ¾ÊÀº Äü ½½·Ô ÀÎµ¦½º: {quickSlotIndex} (ÇöÀç ÀÎº¥Åä¸® ¾ÆÀÌÅÛ ¼ö: {items.Count})");
+            Debug.LogWarning($"[ì¸ë²¤í† ë¦¬] ìœ íš¨í•˜ì§€ ì•Šì€ í€µ ìŠ¬ë¡¯ ì¸ë±ìŠ¤: {quickSlotIndex} (í˜„ì¬ ì¸ë²¤í† ë¦¬ ì•„ì´í…œ ìˆ˜: {items.Count})");
         }
     }
 
-
-    // ÀúÀå
+    // ì¸ë²¤í† ë¦¬ ì €ì¥ ë° ë¶ˆëŸ¬ì˜¤ê¸° ë©”ì„œë“œëŠ” ê·¸ëŒ€ë¡œ ìœ ì§€ë©ë‹ˆë‹¤.
     public void SaveInventory()
     {
         string json = JsonUtility.ToJson(new InventorySaveData(items));
         File.WriteAllText(savePath, json);
     }
 
-    // ºÒ·¯¿À±â
     public void LoadInventory()
     {
         if (File.Exists(savePath))
@@ -249,56 +228,64 @@ public class InventorySystem : MonoBehaviour
             items = loadedData.items;
             if (items.Count == 0)
             {
-                Debug.Log("ÀúÀåµÈ ÀÎº¥Åä¸®°¡ ¾ø´Â °Í °°¾Æ.");
+                Debug.Log("ì €ì¥ëœ ì¸ë²¤í† ë¦¬ê°€ ì—†ëŠ” ê²ƒ ê°™ì•„.");
             }
             else
             {
-                Debug.Log($"...ÀÌÀüÀÇ ÀÎº¥Åä¸®¸¦ ºÒ·¯¿Ô¾î.");
+                Debug.Log($"...ì´ì „ì˜ ì¸ë²¤í† ë¦¬ë¥¼ ë¶ˆëŸ¬ì™”ì–´.");
             }
         }
         else
         {
-            Debug.Log("ÀúÀåµÈ ÀÎº¥Åä¸®°¡ ¾ø´Â °Í °°¾Æ.");
+            Debug.Log("ì €ì¥ëœ ì¸ë²¤í† ë¦¬ê°€ ì—†ëŠ” ê²ƒ ê°™ì•„.");
         }
 
+        // ë¶ˆëŸ¬ì˜¨ ì•„ì´í…œ ë°ì´í„°ì— UseItemEffect ë¸ë¦¬ê²Œì´íŠ¸ ë‹¤ì‹œ ì—°ê²° (íŠ¹íˆ PlusTimeItemDataì˜ ê²½ìš°)
         foreach (var invItem in items)
         {
-            PlusTimeItemData itemData = GetItemDataByName(invItem.itemName);
+            BaseItemData itemData = GetItemDataByName(invItem.itemName); // â¬‡ï¸ [ìˆ˜ì •] BaseItemDataë¡œ ë°›ìŒ
             if (itemData != null)
             {
-                itemData.OnUseItem = () =>
+                // â¬‡ï¸ [ìˆ˜ì •] PlusTimeItemData íƒ€ì…ì¼ ê²½ìš°ì—ë§Œ ë¸ë¦¬ê²Œì´íŠ¸ ì—°ê²° (Load ì‹œì—ë„ í•„ìš”)
+                if (itemData is PlusTimeItemData plusTimeData)
                 {
-                    //Debug.Log($"[ÀÎº¥Åä¸® - Load - OnUseItem] '{itemData.itemName}' ¾ÆÀÌÅÛ È¿°ú ½ÇÇà!");
-                    GameTimer timer = FindObjectOfType<GameTimer>();
-                    if (timer != null)
+                    plusTimeData.OnUseItem = () =>
                     {
-                        timer.AddTime(itemData.timeToAdd);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("¾À¿¡¼­ 'GameTimer' ½ºÅ©¸³Æ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù. ½Ã°£À» Ãß°¡ÇÒ ¼ö ¾ø½À´Ï´Ù.");
-                    }
-                    //RemoveItem(itemData.itemName);
-                };
+                        GameTimer timer = FindObjectOfType<GameTimer>();
+                        if (timer != null)
+                        {
+                            timer.AddTime(plusTimeData.timeToAdd);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("ì”¬ì—ì„œ 'GameTimer' ìŠ¤í¬ë¦½íŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ì‹œê°„ì„ ì¶”ê°€í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+                        }
+                    };
+                }
+                // LightItemDataëŠ” OnUseItem ë¸ë¦¬ê²Œì´íŠ¸ë¥¼ ì§ì ‘ ì‚¬ìš©í•˜ì§€ ì•Šìœ¼ë¯€ë¡œ ì—°ê²° ë¶ˆí•„ìš”
             }
         }
     }
 
-    // ¾ÆÀÌÅÛ ÀÌ¸§À¸·Î PlusTimeItemData Ã£±â
-    public PlusTimeItemData GetItemDataByName(string itemName)
+    /// <summary>
+    /// ì•„ì´í…œ ì´ë¦„ìœ¼ë¡œ BaseItemDataë¥¼ ì°¾ì•„ ë°˜í™˜í•©ë‹ˆë‹¤.
+    /// </summary>
+    /// <param name="itemName">ì°¾ì„ ì•„ì´í…œì˜ ì´ë¦„ì…ë‹ˆë‹¤.</param>
+    /// <returns>í•´ë‹¹ ì´ë¦„ì˜ BaseItemData ë˜ëŠ” null.</returns>
+    public BaseItemData GetItemDataByName(string itemName) // â¬‡ï¸ [ìˆ˜ì •] PlusTimeItemData -> BaseItemDataë¡œ ë³€ê²½
     {
         return allItemData.Find(x => x.itemName == itemName);
     }
 
-    // ÀÎº¥Åä¸® ÀúÀå¿ë ·¡ÆÛ Å¬·¡½º
-    [System.Serializable]
-    private class InventorySaveData
-    {
-        public List<InventoryItem> items;
-
-        public InventorySaveData(List<InventoryItem> items)
-        {
-            this.items = items;
-        }
-    }
+    // InventorySaveData ë˜í¼ í´ë˜ìŠ¤ëŠ” ì—¬ê¸°ì— ìˆì—ˆìœ¼ë¯€ë¡œ ê·¸ëŒ€ë¡œ ìœ ì§€ë©ë‹ˆë‹¤.
+    // [System.Serializable]
+    // private class InventorySaveData
+    // {
+    //     public List<InventoryItem> items;
+    //
+    //     public InventorySaveData(List<InventoryItem> items)
+    //     {
+    //         this.items = items;
+    //     }
+    // }
 }

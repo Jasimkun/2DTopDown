@@ -3,11 +3,12 @@ using UnityEngine.Tilemaps;
 using System.Collections;
 using System.Collections.Generic;
 
-public class PlusTimeItemSpawner : MonoBehaviour
+public class ItemSpawner : MonoBehaviour
 {
     public Tilemap groundTilemap;
     public TileBase targetTile;
     public GameObject PlusTimeItemPrefab;
+    public GameObject NewLightItemPrefab;
 
     [Header("제외할 타일들 (생성되지 않도록)")]
     public List<TileBase> excludedTiles;  // 유니티 인스펙터에서 타일 직접 지정

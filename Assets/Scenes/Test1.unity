@@ -350,7 +350,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 10}
-  m_LocalScale: {x: 2.5233128, y: 2.5233128, z: 2.5233128}
+  m_LocalScale: {x: 1.9557935, y: 1.9557935, z: 1.9557935}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 497352730}
@@ -3687,7 +3687,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.7, y: 0.7, z: 1}
+  m_LocalScale: {x: 0.65, y: 0.65, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -3765,7 +3765,7 @@ MonoBehaviour:
   downSprite: {fileID: -1539266507, guid: 893e40a7eeb93f54b9efc211a0c07b25, type: 3}
   leftSprite: {fileID: 1823513504, guid: 893e40a7eeb93f54b9efc211a0c07b25, type: 3}
   rightSprite: {fileID: -378461542, guid: 893e40a7eeb93f54b9efc211a0c07b25, type: 3}
-  speed: 7
+  speed: 6
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

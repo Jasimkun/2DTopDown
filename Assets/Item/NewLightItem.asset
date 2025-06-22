@@ -16,4 +16,4 @@ MonoBehaviour:
   scaleHoldDuration: 5
   point: 0
   itemName: 
-  icon: {fileID: 0}
+  icon: {fileID: 1908104082, guid: 0fcde5f9384d3c148a03ede6c3f53686, type: 3}

@@ -2,7 +2,7 @@ using UnityEngine;
 
 // Unity 에디터의 Assets 메뉴에서 "Create/Item/LightItem"으로 이 ScriptableObject Asset을 생성할 수 있습니다.
 [CreateAssetMenu(fileName = "NewLightItem", menuName = "Item/LightItem")]
-public class LightItemData : ScriptableObject
+public class LightItemData : BaseItemData
 {
     [Header("스프라이트 스케일 효과 설정")]
     [Tooltip("원본 스케일 대비 목표 스케일 배율입니다.")]
@@ -13,9 +13,6 @@ public class LightItemData : ScriptableObject
     public float scaleHoldDuration = 5f;
 
     public int point;      // 아이템 점수나 값 (필요하면 사용)
-    public string itemName;
-    public Sprite icon;
-
     /// <summary>
     /// 이 효과를 특정 GameObject에 적용하도록 지시합니다.
     /// 대상 GameObject에 ScaleEffectHandler 컴포넌트가 없으면 자동으로 추가합니다.
