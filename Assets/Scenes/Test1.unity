@@ -253,13 +253,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 28291765}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+      - m_Target: {fileID: 28291770}
+        m_TargetAssemblyTypeName: QuickSlotUIController, Assembly-CSharp
+        m_MethodName: RefreshQuickSlotsUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -315,12 +315,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c569b83e2d4216048b510d050cfb200a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  quickSlotButtons:
-  - {fileID: 28291767}
-  quickSlotImages:
-  - {fileID: 28291768}
-  quickSlotCountTexts:
-  - {fileID: 1802994832}
+  quickSlots:
+  - currentButton: {fileID: 28291767}
+    currentImage: {fileID: 28291768}
+    currentText: {fileID: 1802994832}
   defaultSlotSprite: {fileID: 21300000, guid: 2495ce8068c5d0e4d99a0c4eebd43e5e, type: 3}
 --- !u!1 &154514735
 GameObject:
@@ -339,7 +337,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &154514736
 Transform:
   m_ObjectHideFlags: 0
@@ -3272,7 +3270,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1890795472}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1890795474}
+        m_TargetAssemblyTypeName: QuickSlotUIController, Assembly-CSharp
+        m_MethodName: RefreshQuickSlotsUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1890795472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3323,13 +3333,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c569b83e2d4216048b510d050cfb200a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  quickSlotButtons:
-  - {fileID: 1890795471}
-  quickSlotImages:
-  - {fileID: 1890795472}
-  quickSlotCountTexts:
-  - {fileID: 357980535}
-  defaultSlotSprite: {fileID: 21300000, guid: b242e65506ad2bf4d8852fe9cd7ca0e5, type: 3}
+  quickSlots:
+  - currentButton: {fileID: 1890795471}
+    currentImage: {fileID: 1890795472}
+    currentText: {fileID: 357980535}
+  defaultSlotSprite: {fileID: 1908104082, guid: 0fcde5f9384d3c148a03ede6c3f53686, type: 3}
 --- !u!114 &1890795475
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3420,12 +3428,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   groundTilemap: {fileID: 1723917991}
-  targetTile: {fileID: 11400000, guid: ed7e408237de64c57abab945a099b673, type: 2}
+  targetTile: {fileID: 11400000, guid: 51943b0ebf949934c8a4e34c669a3d65, type: 2}
   PlusTimeItemPrefab: {fileID: 6034082990051690206, guid: ac2fed64ede258b42b8234196d27c10e, type: 3}
+  NewLightItemPrefab: {fileID: 6034082990051690206, guid: 2ca231fcdb0de39469ab0910fc5a48db, type: 3}
   excludedTiles:
   - {fileID: 11400000, guid: 69b2cc5aeacbc1b42a39302389dc4eca, type: 2}
   - {fileID: 11400000, guid: f269861d15e133d4c9fcd50b539cbbb3, type: 2}
   - {fileID: 11400000, guid: 81c4b33e3b055d14b9e3e201f9dbb8d7, type: 2}
+  - {fileID: 11400000, guid: f3c433df7728b784daccb0f73a887cbe, type: 2}
+  - {fileID: 11400000, guid: fa325537ef098bc49b5d1e63036466c8, type: 2}
+  - {fileID: 11400000, guid: e612f9dab3eeb0540903222db3b66781, type: 2}
+  - {fileID: 11400000, guid: a9f2638a342846b4788a048a05d6b057, type: 2}
+  - {fileID: 11400000, guid: 2d7ac98de81fa88488e8703348895568, type: 2}
+  - {fileID: 11400000, guid: f3016ec2e6b47fc49a8608a88f973ac5, type: 2}
 --- !u!4 &2101030596
 Transform:
   m_ObjectHideFlags: 0

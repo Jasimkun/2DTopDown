@@ -2,17 +2,16 @@
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System; // Action 델리게이트 사용을 위해
+using System;
 
-// InventoryItem 클래스는 그대로 유지됩니다.
 [System.Serializable]
 public class InventoryItem
 {
     public string itemName;
-    public int count;
+    public int count; // (현재는 항상 1이지만, 확장 시 사용 가능)
 
     [System.NonSerialized]
-    public bool usedInCurrentScene;
+    public bool usedInCurrentScene; // 이 씬에서 아이템이 사용되었는지 여부
 
     public InventoryItem(string name)
     {
@@ -22,7 +21,6 @@ public class InventoryItem
     }
 }
 
-// 인벤토리 저장용 래퍼 클래스는 그대로 유지됩니다.
 [System.Serializable]
 public class InventorySaveData
 {
@@ -39,13 +37,12 @@ public class InventorySystem : MonoBehaviour
     public static InventorySystem Instance { get; private set; }
     public List<InventoryItem> items = new List<InventoryItem>();
 
-    // ⬇️ [수정] 모든 아이템 데이터를 BaseItemData 타입으로 저장합니다.
-    // 에디터에서 모든 PlusTimeItemData와 LightItemData 에셋을 여기에 할당하세요.
-    public List<BaseItemData> allItemData;
+    [Tooltip("모든 BaseItemData 에셋을 여기에 할당하세요. 상점 및 인벤토리에서 참조됩니다.")]
+    public List<BaseItemData> allItemData; // 모든 아이템 데이터 에셋들의 리스트
 
     private string savePath;
     private QuickSlotUIController quickSlotUIController;
-    private GameObject playerGameObject; // ⬇️ [추가] 플레이어 GameObject를 저장할 변수
+    private GameObject playerGameObject;
 
     private void Awake()
     {
@@ -53,6 +50,7 @@ public class InventorySystem : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            savePath = Application.persistentDataPath + "/inventory.json";
         }
         else
         {
@@ -60,7 +58,6 @@ public class InventorySystem : MonoBehaviour
             return;
         }
 
-        savePath = Application.persistentDataPath + "/inventory.json";
         LoadInventory();
     }
 
@@ -76,7 +73,7 @@ public class InventorySystem : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // 씬 로드 시 모든 아이템의 사용 기록 초기화
+        // 씬 로드 시 모든 아이템의 사용 기록 초기화 (로그라이크 씬 당 1회 사용)
         foreach (var item in items)
         {
             item.usedInCurrentScene = false;
@@ -93,8 +90,7 @@ public class InventorySystem : MonoBehaviour
             Debug.LogWarning($"[InventorySystem] 씬 '{scene.name}'에서 QuickSlotUIController를 찾을 수 없습니다.");
         }
 
-        // ⬇️ [추가] 씬 로드 시 플레이어 GameObject를 다시 찾습니다.
-        // 플레이어에 "Player" 태그가 붙어있다고 가정합니다.
+        // 씬 로드 시 플레이어 GameObject를 다시 찾습니다. (효과 적용을 위해)
         GameObject foundPlayer = GameObject.FindGameObjectWithTag("Player");
         if (foundPlayer != null)
         {
@@ -110,8 +106,8 @@ public class InventorySystem : MonoBehaviour
     /// <summary>
     /// 인벤토리에 아이템을 추가합니다. BaseItemData 타입을 받도록 일반화되었습니다.
     /// </summary>
-    /// <param name="itemData">추가할 아이템 데이터 (BaseItemData 상속)</param>
-    public void AddItem(BaseItemData itemData) // ⬇️ [수정] PlusTimeItemData -> BaseItemData로 변경
+    /// <param name="itemData">추가할 아이템 데이터 (BaseItemData 상속).</param>
+    public void AddItem(BaseItemData itemData)
     {
         if (itemData == null)
         {
@@ -123,41 +119,42 @@ public class InventorySystem : MonoBehaviour
         InventoryItem existing = items.Find(i => i.itemName == itemData.itemName);
         if (existing != null)
         {
-            // 한 번 먹은 아이템은 다시 추가 안 함 (개수 증가 로직이 필요하다면 여기 수정)
-            Debug.Log($"이미 인벤토리에 존재하는 아이템이야.");
+            Debug.Log($"이미 인벤토리에 존재하는 아이템 '{itemData.itemName}'입니다.");
+            // 아이템 개수를 늘리는 로직이 필요하다면 여기에서 existing.count++; 를 구현합니다.
             return;
         }
         else
         {
             // 새로운 InventoryItem 인스턴스 생성 및 추가
             items.Add(new InventoryItem(itemData.itemName));
-            SaveInventory(); // 인벤토리 변경 사항 저장
-            Debug.Log($"새로운 아이템을 인벤토리에 저장했어.");
+            SaveInventory();
+            Debug.Log($"인벤토리에 '{itemData.itemName}' 아이템을 저장했습니다.");
 
-            // ⬇️ [수정] BaseItemData의 OnUseItem 델리게이트 연결 (plusTimeItemData에만 연결)
-            // LightItemData는 OnUseItem 델리게이트를 사용하지 않으므로 (ApplyEffect를 직접 호출)
-            // PlusTimeItemData 타입일 경우에만 해당 델리게이트를 연결합니다.
+            // PlusTimeItemData의 경우에만 OnUseItem 델리게이트를 연결합니다.
+            // LightItemData는 UseItemEffect 내에서 직접 효과를 적용하므로 이 델리게이트가 필요 없습니다.
             if (itemData is PlusTimeItemData plusTimeData)
             {
+                // 델리게이트는 아이템 사용 시 실제 효과를 GameTimer에 적용합니다.
                 plusTimeData.OnUseItem = () =>
                 {
-                    Debug.Log($"'{plusTimeData.itemName}' 아이템을 사용했어. 시간이 {plusTimeData.timeToAdd}초 추가된 것 같아.");
-                    GameTimer timer = FindObjectOfType<GameTimer>(); // 씬에서 타이머를 찾아 시간을 추가
+                    // ShopManager에서 아이템의 현재 업그레이드 레벨을 가져옵니다.
+                    int currentLevel = ShopManager.Instance != null ? ShopManager.Instance.GetItemUpgradeLevel(plusTimeData.itemName) : 0;
+                    float timeBonus = plusTimeData.GetEffectiveTimeToAdd(currentLevel);
+
+                    Debug.Log($"'{plusTimeData.itemName}' 아이템을 사용했어. 시간이 {timeBonus}초 추가된 것 같아. (레벨: {currentLevel})");
+                    GameTimer timer = FindObjectOfType<GameTimer>();
                     if (timer != null)
                     {
-                        timer.AddTime(plusTimeData.timeToAdd);
+                        timer.AddTime(timeBonus);
                     }
                     else
                     {
                         Debug.LogWarning("씬에서 'GameTimer' 스크립트를 찾을 수 없습니다. 시간을 추가할 수 없습니다.");
                     }
-                    // 아이템 사용 후 제거 (필요하다면)
-                    // RemoveItem(plusTimeData.itemName);
+                    // 아이템 사용 후 제거 (필요하다면 RemoveItem(plusTimeData.itemName); 호출)
                 };
             }
-            // ⬇️ [추가] LightItemData는 AddItem 시 별도의 OnUseItem 연결 필요 없음 (UseItemEffect 내부에서 직접 효과 적용)
 
-            // UI 갱신 (퀵 슬롯에 새 아이템이 추가되도록)
             if (quickSlotUIController != null)
             {
                 quickSlotUIController.RefreshQuickSlotsUI();
@@ -174,8 +171,9 @@ public class InventorySystem : MonoBehaviour
         if (quickSlotIndex >= 0 && quickSlotIndex < items.Count)
         {
             InventoryItem invItem = items[quickSlotIndex];
-            BaseItemData itemData = GetItemDataByName(invItem.itemName); // ⬇️ [수정] BaseItemData로 받음
+            BaseItemData itemData = GetItemDataByName(invItem.itemName);
 
+            // 현재 씬에서 이미 사용되었는지 확인 (로그라이크 씬 당 1회 사용 제한)
             if (invItem.usedInCurrentScene)
             {
                 Debug.Log($"'{invItem.itemName}' 아이템은 맵마다 한 번씩만 사용할 수 있는 것 같아.");
@@ -184,22 +182,27 @@ public class InventorySystem : MonoBehaviour
 
             if (itemData != null)
             {
+                // 플레이어 GameObject가 null이면 다시 찾기 시도
                 if (playerGameObject == null)
                 {
-                    playerGameObject = GameObject.FindGameObjectWithTag("Player"); // 플레이어 다시 찾기 시도
+                    playerGameObject = GameObject.FindGameObjectWithTag("Player");
                 }
 
-                // ⬇️ [수정] BaseItemData의 UseItemEffect 메서드 호출 시 플레이어 GameObject 전달
-                // 각 아이템 데이터의 UseItemEffect는 오버라이드되어 해당 아이템의 고유한 효과를 실행합니다.
-                itemData.UseItemEffect(playerGameObject); // playerGameObject를 user로 전달
+                // BaseItemData의 UseItemEffect 메서드를 호출하여 해당 아이템의 고유한 효과를 실행합니다.
+                // LightItemData의 UseItemEffect는 여기서 playerGameObject를 직접 넘겨 ScaleEffectHandler를 호출합니다.
+                // PlusTimeItemData의 UseItemEffect는 OnUseItem 델리게이트를 호출하고, 그 델리게이트에 시간이 추가되는 로직이 연결되어 있습니다.
+                itemData.UseItemEffect(playerGameObject);
 
-                invItem.usedInCurrentScene = true; // 현재 씬에서 사용됨으로 표시
+                invItem.usedInCurrentScene = true; // 아이템 사용 후 현재 씬에서 사용됨으로 표시
 
-                // UI 갱신 (아이템 사용 상태 변화를 반영)
+                // UI 갱신 (아이템 사용 상태 변화를 반영하기 위함)
                 if (quickSlotUIController != null)
                 {
                     quickSlotUIController.RefreshQuickSlotsUI();
                 }
+
+                // 사용 후 아이템 제거가 필요하다면 여기서 RemoveItem 호출.
+                // 현재는 'usedInCurrentScene'으로 씬 당 1회 제한이 걸리므로 제거는 하지 않습니다.
             }
             else
             {
@@ -212,11 +215,11 @@ public class InventorySystem : MonoBehaviour
         }
     }
 
-    // 인벤토리 저장 및 불러오기 메서드는 그대로 유지됩니다.
     public void SaveInventory()
     {
         string json = JsonUtility.ToJson(new InventorySaveData(items));
         File.WriteAllText(savePath, json);
+        Debug.Log("인벤토리 데이터 저장됨.");
     }
 
     public void LoadInventory()
@@ -240,21 +243,24 @@ public class InventorySystem : MonoBehaviour
             Debug.Log("저장된 인벤토리가 없는 것 같아.");
         }
 
-        // 불러온 아이템 데이터에 UseItemEffect 델리게이트 다시 연결 (특히 PlusTimeItemData의 경우)
+        // 불러온 아이템 데이터에 OnUseItem 델리게이트를 다시 연결합니다.
         foreach (var invItem in items)
         {
-            BaseItemData itemData = GetItemDataByName(invItem.itemName); // ⬇️ [수정] BaseItemData로 받음
+            BaseItemData itemData = GetItemDataByName(invItem.itemName);
             if (itemData != null)
             {
-                // ⬇️ [수정] PlusTimeItemData 타입일 경우에만 델리게이트 연결 (Load 시에도 필요)
                 if (itemData is PlusTimeItemData plusTimeData)
                 {
                     plusTimeData.OnUseItem = () =>
                     {
+                        // ShopManager에서 아이템의 현재 업그레이드 레벨을 가져옵니다.
+                        int currentLevel = ShopManager.Instance != null ? ShopManager.Instance.GetItemUpgradeLevel(plusTimeData.itemName) : 0;
+                        float timeBonus = plusTimeData.GetEffectiveTimeToAdd(currentLevel);
+
                         GameTimer timer = FindObjectOfType<GameTimer>();
                         if (timer != null)
                         {
-                            timer.AddTime(plusTimeData.timeToAdd);
+                            timer.AddTime(timeBonus);
                         }
                         else
                         {
@@ -262,7 +268,6 @@ public class InventorySystem : MonoBehaviour
                         }
                     };
                 }
-                // LightItemData는 OnUseItem 델리게이트를 직접 사용하지 않으므로 연결 불필요
             }
         }
     }
@@ -272,20 +277,8 @@ public class InventorySystem : MonoBehaviour
     /// </summary>
     /// <param name="itemName">찾을 아이템의 이름입니다.</param>
     /// <returns>해당 이름의 BaseItemData 또는 null.</returns>
-    public BaseItemData GetItemDataByName(string itemName) // ⬇️ [수정] PlusTimeItemData -> BaseItemData로 변경
+    public BaseItemData GetItemDataByName(string itemName)
     {
         return allItemData.Find(x => x.itemName == itemName);
     }
-
-    // InventorySaveData 래퍼 클래스는 여기에 있었으므로 그대로 유지됩니다.
-    // [System.Serializable]
-    // private class InventorySaveData
-    // {
-    //     public List<InventoryItem> items;
-    //
-    //     public InventorySaveData(List<InventoryItem> items)
-    //     {
-    //         this.items = items;
-    //     }
-    // }
 }

@@ -1,33 +1,46 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
-// Unity ¿¡µğÅÍÀÇ Assets ¸Ş´º¿¡¼­ "Create/Item/LightItem"À¸·Î ÀÌ ScriptableObject AssetÀ» »ı¼ºÇÒ ¼ö ÀÖ½À´Ï´Ù.
 [CreateAssetMenu(fileName = "NewLightItem", menuName = "Item/LightItem")]
 public class LightItemData : BaseItemData
 {
-    [Header("½ºÇÁ¶óÀÌÆ® ½ºÄÉÀÏ È¿°ú ¼³Á¤")]
-    [Tooltip("¿øº» ½ºÄÉÀÏ ´ëºñ ¸ñÇ¥ ½ºÄÉÀÏ ¹èÀ²ÀÔ´Ï´Ù.")]
-    public Vector3 targetScaleMultiplier = new Vector3(1.5f, 1.5f, 1.5f);
+    // â¬‡ï¸ [ì¶”ê°€] ë ˆë²¨ 0ì—ì„œì˜ ê¸°ë³¸ ìŠ¤ì¼€ì¼ ë°°ìœ¨
+    public Vector3 baseTargetScaleMultiplier = new Vector3(1.5f, 1.5f, 1.5f);
+    // â¬‡ï¸ [ì¶”ê°€] ë ˆë²¨ 1 ì¦ê°€ë‹¹ ì¶”ê°€ë˜ëŠ” ìŠ¤ì¼€ì¼ ë°°ìœ¨
+    public float scaleMultiplierPerLevel = 0.1f;
 
+    public float scaleHoldDuration = 5f; // (ê¸°ì¡´ëŒ€ë¡œ ìœ ì§€)
+    public int point; // (ê¸°ì¡´ëŒ€ë¡œ ìœ ì§€)
 
-    [Tooltip("½ºÄÉÀÏÀÌ Ä¿Áø »óÅÂ·Î À¯ÁöµÇ´Â ½Ã°£ (ÃÊ)ÀÔ´Ï´Ù.")]
-    public float scaleHoldDuration = 5f;
-
-    public int point;      // ¾ÆÀÌÅÛ Á¡¼ö³ª °ª (ÇÊ¿äÇÏ¸é »ç¿ë)
     /// <summary>
-    /// ÀÌ È¿°ú¸¦ Æ¯Á¤ GameObject¿¡ Àû¿ëÇÏµµ·Ï Áö½ÃÇÕ´Ï´Ù.
-    /// ´ë»ó GameObject¿¡ ScaleEffectHandler ÄÄÆ÷³ÍÆ®°¡ ¾øÀ¸¸é ÀÚµ¿À¸·Î Ãß°¡ÇÕ´Ï´Ù.
+    /// ì£¼ì–´ì§„ ë ˆë²¨ì— í•´ë‹¹í•˜ëŠ” ì‹¤ì œ ìŠ¤ì¼€ì¼ ë°°ìœ¨ ê°’ì„ ê³„ì‚°í•˜ì—¬ ë°˜í™˜í•©ë‹ˆë‹¤.
     /// </summary>
-    /// <param name="targetObject">½ºÄÉÀÏ È¿°ú¸¦ Àû¿ëÇÒ GameObjectÀÔ´Ï´Ù.</param>
-    public void ApplyEffect(GameObject targetObject)
+    /// <param name="level">ê³„ì‚°í•  ì—…ê·¸ë ˆì´ë“œ ë ˆë²¨ì…ë‹ˆë‹¤.</param>
+    /// <returns>í•´ë‹¹ ë ˆë²¨ì—ì„œì˜ ìµœì¢… ìŠ¤ì¼€ì¼ ë°°ìœ¨ ê°’ì…ë‹ˆë‹¤.</returns>
+    public Vector3 GetEffectiveTargetScaleMultiplier(int level)
     {
-        // targetObject¿¡ ScaleEffectHandler ÄÄÆ÷³ÍÆ®°¡ ÀÖ´ÂÁö È®ÀÎÇÏ°í ¾øÀ¸¸é Ãß°¡ÇÕ´Ï´Ù.
-        ScaleEffectHandler handler = targetObject.GetComponent<ScaleEffectHandler>();
-        if (handler == null)
-        {
-            handler = targetObject.AddComponent<ScaleEffectHandler>();
-        }
+        // ê° ì¶•(X, Y, Z)ì— ëŒ€í•´ ë ˆë²¨ì— ë”°ë¼ ìŠ¤ì¼€ì¼ ì¦ê°€ëŸ‰ì„ ë”í•©ë‹ˆë‹¤.
+        return baseTargetScaleMultiplier + (Vector3.one * (level * scaleMultiplierPerLevel));
+    }
 
-        // ÇÚµé·¯¿¡°Ô È¿°ú ¼³Á¤À» Àü´ŞÇÏ°í ½ÃÀÛÇÏµµ·Ï ÇÕ´Ï´Ù.
-        handler.StartScaleEffect(this);
+    public override void UseItemEffect(GameObject user = null)
+    {
+        if (user != null)
+        {
+            ScaleEffectHandler handler = user.GetComponent<ScaleEffectHandler>();
+            if (handler == null)
+            {
+                handler = user.AddComponent<ScaleEffectHandler>();
+            }
+            // ScaleEffectHandlerë¡œ LightItemData ìì²´ë¥¼ ë„˜ê²¨,
+            // í•¸ë“¤ëŸ¬ ë‚´ë¶€ì—ì„œ ShopManagerë¡œë¶€í„° í˜„ì¬ ë ˆë²¨ì„ ì¡°íšŒí•˜ë„ë¡ í•©ë‹ˆë‹¤.
+            handler.StartScaleEffect(this);
+            Debug.Log($"[LightItemData] '{itemName}' ì•„ì´í…œ íš¨ê³¼ ì‚¬ìš©! ìŠ¤ì¼€ì¼ íš¨ê³¼ ì ìš©. (Level will be determined by ShopManager)");
+        }
+        else
+        {
+            Debug.LogWarning($"[LightItemData] '{itemName}' ì•„ì´í…œ íš¨ê³¼ë¥¼ ì ìš©í•  ëŒ€ìƒ(user)ì´ ì—†ìŠµë‹ˆë‹¤.");
+        }
+        // LightItemDataëŠ” OnUseItem ë¸ë¦¬ê²Œì´íŠ¸ë¥¼ ì§ì ‘ ì‚¬ìš©í•˜ì§€ ì•Šì„ ìˆ˜ ìˆìœ¼ë¯€ë¡œ, ì£¼ì„ ì²˜ë¦¬í•©ë‹ˆë‹¤.
+        // OnUseItem?.Invoke();
     }
 }

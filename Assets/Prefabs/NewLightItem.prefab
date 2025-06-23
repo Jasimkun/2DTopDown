@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3542247808534430479}
   - component: {fileID: 570201236782076373}
-  - component: {fileID: -276369993230217177}
   - component: {fileID: -4940075899410057224}
+  - component: {fileID: 5254153533328631963}
   m_Layer: 0
   m_Name: NewLightItem
   m_TagString: Item
@@ -86,20 +86,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &-276369993230217177
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6034082990051690206}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05d9d2a1c5151a04f8fe2a10cdd840e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemName: PlusTime
-  data: {fileID: 11400000, guid: d23d1e7c303aca04dbdb1ae5c671e1cf, type: 2}
 --- !u!61 &-4940075899410057224
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -145,3 +131,17 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.16, y: 0.16}
   m_EdgeRadius: 0
+--- !u!114 &5254153533328631963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6034082990051690206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf82ae69f1e313a47b25012a285712c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemName: Light
+  data: {fileID: 11400000, guid: 8e4b8035221152a49a90da3d34b81b02, type: 2}

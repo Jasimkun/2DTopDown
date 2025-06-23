@@ -1,106 +1,101 @@
-// QuickSlotUIController.cs
-
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // TextMeshPro¸¦ »ç¿ëÇÑ´Ù¸é ÇÊ¿ä
+using TMPro; // TextMeshProë¥¼ ì‚¬ìš©í•˜ë¯€ë¡œ í•„ìš”í•©ë‹ˆë‹¤.
 
 public class QuickSlotUIController : MonoBehaviour
 {
-    [Header("UI References")]
-    public Button[] quickSlotButtons; // °¢ Äü ½½·ÔÀÇ Button ÄÄÆ÷³ÍÆ® Ãß°¡
-    public Image[] quickSlotImages;
-    public TextMeshProUGUI[] quickSlotCountTexts;
+    // í€µ ìŠ¬ë¡¯ UI ìš”ì†Œë“¤ (ë²„íŠ¼, ì´ë¯¸ì§€, í…ìŠ¤íŠ¸)ì„ ì—°ê²°í•  ë°°ì—´
+    public QuickSlotUI[] quickSlots;
 
-    [Header("Item Sprites")]
+    // ì•„ì´í…œì´ ì—†ì„ ë•Œ í‘œì‹œí•  ê¸°ë³¸ ìŠ¤í”„ë¼ì´íŠ¸ (ì„ íƒ ì‚¬í•­)
     public Sprite defaultSlotSprite;
 
-    private InventorySystem inventorySystem;
-
-    void Awake()
+    void Start()
     {
-        inventorySystem = FindObjectOfType<InventorySystem>();
-        if (inventorySystem == null)
-        {
-            Debug.LogError("¾À¿¡ InventorySystemÀÌ ¾ø½À´Ï´Ù. Äü ½½·Ô UI¸¦ °»½ÅÇÒ ¼ö ¾ø½À´Ï´Ù.");
-        }
-
-        // --- Ãß°¡: °¢ ¹öÆ°¿¡ Å¬¸¯ ÀÌº¥Æ® ¸®½º³Ê ÇÒ´ç ---
-        for (int i = 0; i < quickSlotButtons.Length; i++)
-        {
-            int slotIndex = i; // Å¬·ÎÀú ¹®Á¦ ¹æÁö¸¦ À§ÇØ ·ÎÄÃ º¯¼ö »ç¿ë
-            quickSlotButtons[i].onClick.AddListener(() => OnQuickSlotButtonClick(slotIndex));
-            // ÃÊ±â¿¡´Â ¹öÆ° ºñÈ°¼ºÈ­ (¾ÆÀÌÅÛÀÌ ¾øÀ¸¸é Å¬¸¯ ºÒ°¡)
-            quickSlotButtons[i].interactable = false;
-        }
-        // --- Ãß°¡ ³¡ ---
-
-        RefreshQuickSlotsUI(); // Awake¿¡¼­ ÃÊ±â UI °»½Å
+        // ì‹œì‘ ì‹œ í€µ ìŠ¬ë¡¯ UIë¥¼ í•œ ë²ˆ ê°±ì‹ í•©ë‹ˆë‹¤.
+        RefreshQuickSlotsUI();
     }
 
-    // Äü ½½·Ô ¹öÆ° Å¬¸¯ ½Ã È£ÃâµÉ ¸Ş¼­µå
-    private void OnQuickSlotButtonClick(int slotIndex)
-    {
-        if (inventorySystem != null)
-        {
-            inventorySystem.UseInventoryItem(slotIndex);
-        }
-    }
-
-
+    // í€µ ìŠ¬ë¡¯ UIë¥¼ ì¸ë²¤í† ë¦¬ ìƒíƒœì— ë”°ë¼ ê°±ì‹ í•˜ëŠ” ë©”ì„œë“œ
     public void RefreshQuickSlotsUI()
     {
-        if (inventorySystem == null)
+        if (InventorySystem.Instance == null)
         {
-            Debug.LogWarning("InventorySystemÀÌ ÃÊ±âÈ­µÇÁö ¾Ê¾Æ Äü ½½·Ô UI¸¦ °»½ÅÇÒ ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("InventorySystem.Instanceê°€ ì—†ìŠµë‹ˆë‹¤. í€µ ìŠ¬ë¡¯ UIë¥¼ ê°±ì‹ í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 
-        // Äü ½½·Ô °³¼ö¸¸Å­ ¹İº¹ÇÏ¸ç UI ¾÷µ¥ÀÌÆ®
-        for (int i = 0; i < quickSlotImages.Length; i++)
+        List<InventoryItem> inventoryItems = InventorySystem.Instance.items;
+        Debug.Log($"[QuickSlotUI] ì¸ë²¤í† ë¦¬ ì‹œìŠ¤í…œì— ìˆëŠ” ì•„ì´í…œ ê°œìˆ˜: {inventoryItems.Count}");
+
+        for (int i = 0; i < quickSlots.Length; i++)
         {
-            // --- Ãß°¡: ¹öÆ° ÂüÁ¶ È®ÀÎ ---
-            Button currentButton = (i < quickSlotButtons.Length) ? quickSlotButtons[i] : null;
-            Image currentImage = quickSlotImages[i];
-            TextMeshProUGUI currentText = quickSlotCountTexts[i];
+            QuickSlotUI currentSlot = quickSlots[i];
 
-            if (currentButton == null || currentImage == null || currentText == null)
+            // UI ìš”ì†Œë“¤ì´ í• ë‹¹ë˜ì—ˆëŠ”ì§€ í™•ì¸í•©ë‹ˆë‹¤.
+            if (currentSlot.currentImage == null || currentSlot.currentText == null || currentSlot.currentButton == null)
             {
-                Debug.LogWarning($"Äü ½½·Ô UI ¼³Á¤ ¿À·ù: {i}¹ø ½½·ÔÀÇ ¹öÆ°/ÀÌ¹ÌÁö/ÅØ½ºÆ® ÄÄÆ÷³ÍÆ®°¡ ´©¶ôµÇ¾ú½À´Ï´Ù.");
-                continue; // ´ÙÀ½ ½½·ÔÀ¸·Î ³Ñ¾î°¨
+                Debug.LogWarning($"í€µ ìŠ¬ë¡¯ {i}ì˜ ë²„íŠ¼/ì´ë¯¸ì§€/í…ìŠ¤íŠ¸ ì»´í¬ë„ŒíŠ¸ê°€ ëˆ„ë½ë˜ì—ˆìŠµë‹ˆë‹¤. Inspectorì—ì„œ í• ë‹¹í•´ì£¼ì„¸ìš”!");
+                continue;
             }
-            // --- Ãß°¡ ³¡ ---
 
-
-            if (i < inventorySystem.items.Count) // ÀÎº¥Åä¸® ¾ÆÀÌÅÛÀÌ ½½·Ô °³¼öº¸´Ù ÀûÀ¸¸é
+            if (i < inventoryItems.Count) // ì¸ë²¤í† ë¦¬ ì•„ì´í…œ ê°œìˆ˜ë³´ë‹¤ ì‘ìœ¼ë©´ (ì¦‰, í•´ë‹¹ ìŠ¬ë¡¯ì— ì•„ì´í…œì´ ìˆë‹¤ë©´)
             {
-                InventoryItem invItem = inventorySystem.items[i];
-                PlusTimeItemData itemData = inventorySystem.GetItemDataByName(invItem.itemName);
+                InventoryItem invItem = inventoryItems[i];
+                BaseItemData itemData = InventorySystem.Instance.GetItemDataByName(invItem.itemName);
+
+                //Debug.Log($"[QuickSlotUI] ìŠ¬ë¡¯ {i}: ì•„ì´í…œ ì´ë¦„ '{invItem.itemName}'. ì•„ì´í…œ ë°ì´í„° ì¡´ì¬ ì—¬ë¶€: {(itemData != null ? "ìˆìŒ" : "ì—†ìŒ")}");
 
                 if (itemData != null)
                 {
-                    currentImage.sprite = itemData.icon; // PlusTimeItemData¿¡ icon ÇÊµå°¡ ÀÖ´Ù°í °¡Á¤
-                    currentImage.color = Color.white;
-                    //currentText.text = invItem.count.ToString();
-                    currentButton.interactable = true; // ¾ÆÀÌÅÛÀÌ ÀÖÀ¸¸é ¹öÆ° È°¼ºÈ­
+                    // â¬‡ï¸ [ìˆ˜ì •] ì•„ì´ì½˜ì´ nullì´ë©´ defaultSlotSpriteë¥¼ ë¨¼ì € í• ë‹¹í•˜ë„ë¡ ë¡œì§ ë³€ê²½
+                    currentSlot.currentImage.sprite = itemData.icon;
+                    if (currentSlot.currentImage.sprite == null) // í• ë‹¹ëœ ì•„ì´ì½˜ì´ ì—†ë‹¤ë©´ ê¸°ë³¸ ìŠ¤í”„ë¼ì´íŠ¸ ì‚¬ìš©
+                    {
+                        currentSlot.currentImage.sprite = defaultSlotSprite;
+                        Debug.LogWarning($"ì•„ì´í…œ '{itemData.itemName}'ì˜ ì•„ì´ì½˜ì´ nullì…ë‹ˆë‹¤. ê¸°ë³¸ ìŠ¬ë¡¯ ìŠ¤í”„ë¼ì´íŠ¸ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.");
+                    }
+                    currentSlot.currentImage.color = Color.white; // ê¸°ë³¸ì ìœ¼ë¡œ í•˜ì–€ìƒ‰ (ì‚¬ìš©ë¨ í‘œì‹œë¥¼ ìœ„í•´)
+
+                    if (invItem.usedInCurrentScene)
+                    {
+                        currentSlot.currentImage.color = Color.gray; // íšŒìƒ‰ìœ¼ë¡œ í‘œì‹œ
+                        currentSlot.currentText.text = "USED"; // ì‚¬ìš©ë¨ í‘œì‹œ
+                        currentSlot.currentButton.interactable = false; // ë²„íŠ¼ ë¹„í™œì„±í™”
+                        Debug.Log($"[QuickSlotUI] ì•„ì´í…œ '{invItem.itemName}'ì€(ëŠ”) ì´ë²ˆ ì”¬ì—ì„œ ì´ë¯¸ ì‚¬ìš©ë¨.");
+                    }
+                    else
+                    {
+                        currentSlot.currentImage.color = Color.white; // ì •ìƒ ìƒ‰ìƒ
+                        currentSlot.currentText.text = invItem.count.ToString(); // ê°œìˆ˜ í‘œì‹œ
+                        currentSlot.currentButton.interactable = true; // ë²„íŠ¼ í™œì„±í™”
+                    }
                 }
-                else
+                else // ì•„ì´í…œ ë°ì´í„°ê°€ nullì¼ ê²½ìš° (InventorySystemì˜ allItemDataì— í• ë‹¹ë˜ì§€ ì•Šì•˜ê±°ë‚˜ ì´ë¦„ì´ ì˜ëª»ëœ ê²½ìš°)
                 {
-                    currentImage.sprite = defaultSlotSprite;
-                    currentImage.color = new Color(1, 1, 1, 0.5f);
-                    currentText.text = "";
-                    currentButton.interactable = false; // ¾ÆÀÌÅÛ µ¥ÀÌÅÍ ¾øÀ¸¸é ºñÈ°¼ºÈ­
-                    Debug.LogWarning($"¾ÆÀÌÅÛ '{invItem.itemName}'¿¡ ´ëÇÑ PlusTimeItemData¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+                    currentSlot.currentImage.sprite = defaultSlotSprite;
+                    currentSlot.currentImage.color = Color.gray;
+                    currentSlot.currentText.text = "N/A"; // Not Available
+                    currentSlot.currentButton.interactable = false;
+                    Debug.LogWarning($"ì¸ë²¤í† ë¦¬ ì•„ì´í…œ '{invItem.itemName}'ì— í•´ë‹¹í•˜ëŠ” BaseItemDataë¥¼ InventorySystemì˜ allItemDataì—ì„œ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ì•„ì´ì½˜ê³¼ ì´ë¦„ í™•ì¸ í•„ìš”.");
                 }
             }
-            else // ÇØ´ç ½½·Ô¿¡ Ç¥½ÃÇÒ ÀÎº¥Åä¸® ¾ÆÀÌÅÛÀÌ ¾ø´Â °æ¿ì
+            else // ì¸ë²¤í† ë¦¬ ì•„ì´í…œ ê°œìˆ˜ë³´ë‹¤ í¬ë©´ (ì¦‰, ë¹ˆ ìŠ¬ë¡¯ì´ë¼ë©´)
             {
-                currentImage.sprite = defaultSlotSprite;
-                currentImage.color = new Color(1, 1, 1, 0.5f);
-                currentText.text = "";
-                currentButton.interactable = false; // ¾ÆÀÌÅÛ ¾øÀ¸¸é ¹öÆ° ºñÈ°¼ºÈ­
+                currentSlot.currentImage.sprite = defaultSlotSprite; // ê¸°ë³¸ ìŠ¤í”„ë¼ì´íŠ¸ (ë¹ˆ ìŠ¬ë¡¯ì´ë¯€ë¡œ)
+                currentSlot.currentImage.color = Color.white; // ì •ìƒ ìƒ‰ìƒ
+                currentSlot.currentText.text = ""; // í…ìŠ¤íŠ¸ ë¹„ì›€
+                currentSlot.currentButton.interactable = false; // ë²„íŠ¼ ë¹„í™œì„±í™”
             }
         }
-        //Debug.Log("Äü ½½·Ô UI°¡ °»½ÅµÇ¾ú½À´Ï´Ù.");
+    }
+
+    [System.Serializable]
+    public class QuickSlotUI
+    {
+        public Button currentButton;
+        public Image currentImage;
+        public TextMeshProUGUI currentText;
     }
 }
