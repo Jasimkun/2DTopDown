@@ -1,184 +1,219 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
-using TMPro; // UI ÅØ½ºÆ® (°ñµå Ç¥½Ã)
-using System.Linq; // Dictionary¿Í List º¯È¯À» À§ÇØ »ç¿ë (Select, ToList)
-using System.IO; // ÆÄÀÏ ÀúÀå/·Îµå¸¦ À§ÇØ »ç¿ë
+using TMPro; // UI í…ìŠ¤íŠ¸ (ê³¨ë“œ í‘œì‹œ)
+using System.Linq; // Dictionaryì™€ List ë³€í™˜ì„ ìœ„í•´ ì‚¬ìš© (Select, ToList)
+using System.IO; // íŒŒì¼ ì €ì¥/ë¡œë“œë¥¼ ìœ„í•´ ì‚¬ìš©
+using UnityEngine.SceneManagement; // ì”¬ ë¡œë“œ ì´ë²¤íŠ¸ ê°ì§€ë¥¼ ìœ„í•´ ì¶”ê°€
 
 public class ShopManager : MonoBehaviour
 {
-    public static ShopManager Instance { get; private set; } // ½Ì±ÛÅæ ÀÎ½ºÅÏ½º
+    public static ShopManager Instance { get; private set; } // ì‹±ê¸€í†¤ ì¸ìŠ¤í„´ìŠ¤
 
-    [Header("°ñµå ¼³Á¤")]
-    public int currentGold = 0; // ÇÃ·¹ÀÌ¾î°¡ ÇöÀç °¡Áø °ñµå
-    public TextMeshProUGUI goldDisplayText; // UI¿¡¼­ °ñµå¸¦ Ç¥½ÃÇÒ TextMeshProUGUI ÄÄÆ÷³ÍÆ®
+    [Header("ê³¨ë“œ ì„¤ì •")]
+    public int currentGold = 0; // í”Œë ˆì´ì–´ê°€ í˜„ì¬ ê°€ì§„ ê³¨ë“œ
+    // public TextMeshProUGUI goldDisplayText; // ì´ í•„ë“œëŠ” Awake/OnSceneLoadedì—ì„œ ë™ì ìœ¼ë¡œ ì°¾ìŠµë‹ˆë‹¤.
 
-    [Header("»óÁ¡ ¾÷±×·¹ÀÌµå Á¤ÀÇ")]
-    [Tooltip("ÀÌ »óÁ¡¿¡¼­ Á¦°øÇÒ ¸ğµç UpgradeDefinition ¿¡¼ÂÀ» ÇÒ´çÇÏ¼¼¿ä.")]
-    public List<UpgradeDefinition> allUpgradeDefinitions; // »óÁ¡¿¡¼­ Á¦°øÇÒ ¸ğµç ¾÷±×·¹ÀÌµå Á¤ÀÇ ¿¡¼Â ¸ñ·Ï
+    [Header("ìƒì  ì—…ê·¸ë ˆì´ë“œ ì •ì˜")]
+    [Tooltip("ì´ ìƒì ì—ì„œ ì œê³µí•  ëª¨ë“  UpgradeDefinition ì—ì…‹ì„ í• ë‹¹í•˜ì„¸ìš”.")]
+    public List<UpgradeDefinition> allUpgradeDefinitions; // ìƒì ì—ì„œ ì œê³µí•  ëª¨ë“  ì—…ê·¸ë ˆì´ë“œ ì •ì˜ ì—ì…‹ ëª©ë¡
 
-    // °¢ ¾ÆÀÌÅÛÀÇ ÇöÀç ¾÷±×·¹ÀÌµå ·¹º§À» ÀúÀåÇÕ´Ï´Ù. (¾ÆÀÌÅÛ ÀÌ¸§ -> ·¹º§)
-    // ÀÌ µ¥ÀÌÅÍ´Â °ÔÀÓ ÀúÀå/·Îµå ½Ã ÇÔ²² ÀúÀåµÇ¾î¾ß ÇÕ´Ï´Ù.
+    // ê° ì•„ì´í…œì˜ í˜„ì¬ ì—…ê·¸ë ˆì´ë“œ ë ˆë²¨ì„ ì €ì¥í•©ë‹ˆë‹¤. (ì•„ì´í…œ ì´ë¦„ -> ë ˆë²¨)
     private Dictionary<string, int> itemUpgradeLevels = new Dictionary<string, int>();
 
-    // »óÁ¡ µ¥ÀÌÅÍ¸¦ ÀúÀåÇÒ °æ·Î
+    // ìƒì  ë°ì´í„°ë¥¼ ì €ì¥í•  ê²½ë¡œ
     private string shopSavePath;
+
+    private TextMeshProUGUI _goldDisplayText;
 
     void Awake()
     {
-        // ½Ì±ÛÅæ ÆĞÅÏ ±¸Çö: Áßº¹ ÀÎ½ºÅÏ½º ¹æÁö ¹× ¾À ÀüÈ¯ ½Ã ÆÄ±« ¹æÁö
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            shopSavePath = Application.persistentDataPath + "/shopData.json"; // ÀúÀå °æ·Î ¼³Á¤
+            shopSavePath = Application.persistentDataPath + "/shopData.json"; // ì €ì¥ ê²½ë¡œ ì„¤ì •
         }
         else
         {
-            Destroy(gameObject); // ÀÌ¹Ì ÀÎ½ºÅÏ½º°¡ ÀÖÀ¸¸é ÀÚ½ÅÀ» ÆÄ±«
+            Destroy(gameObject); // ì´ë¯¸ ì¸ìŠ¤í„´ìŠ¤ê°€ ìˆìœ¼ë©´ ìì‹ ì„ íŒŒê´´
             return;
         }
     }
 
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        GameObject goldTextObj = GameObject.Find("GoldText"); // ì”¬ì—ì„œ "GoldText"ë¼ëŠ” ì´ë¦„ì˜ GameObjectë¥¼ ì°¾ìŠµë‹ˆë‹¤.
+        if (goldTextObj != null)
+        {
+            _goldDisplayText = goldTextObj.GetComponent<TextMeshProUGUI>();
+            if (_goldDisplayText == null)
+            {
+                Debug.LogWarning("[ShopManager] 'GoldText' GameObjectì—ì„œ TextMeshProUGUI ì»´í¬ë„ŒíŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[ShopManager] ì”¬ì—ì„œ 'GoldText' GameObjectë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ê³¨ë“œ UI ê°±ì‹  ë¶ˆê°€.");
+        }
+
+        UpdateGoldUI(); // ì”¬ ë¡œë“œ ì‹œ ê³¨ë“œ UI ê°±ì‹ 
+        RefreshShopUI(); // â¬‡ï¸ [ì¶”ê°€] ì”¬ ë¡œë“œ ì‹œ ìƒì  UI ê°±ì‹ 
+    }
+
     void Start()
     {
-        LoadGoldAndUpgradeLevels(); // °ÔÀÓ ½ÃÀÛ ½Ã ÀúÀåµÈ µ¥ÀÌÅÍ ·Îµå
-        UpdateGoldUI(); // UI ÃÊ±âÈ­
+        LoadGoldAndUpgradeLevels();
 
-        // ¸ğµç ¾÷±×·¹ÀÌµå °¡´ÉÇÑ ¾ÆÀÌÅÛ¿¡ ´ëÇØ ÃÊ±â ·¹º§ ¼³Á¤ (·ÎµåµÇÁö ¾ÊÀº °æ¿ì)
         foreach (var upgradeDef in allUpgradeDefinitions)
         {
             if (upgradeDef.targetItemData != null && !itemUpgradeLevels.ContainsKey(upgradeDef.targetItemData.itemName))
             {
-                itemUpgradeLevels[upgradeDef.targetItemData.itemName] = 0; // ÃÊ±â ·¹º§ 0 ¼³Á¤
+                itemUpgradeLevels[upgradeDef.targetItemData.itemName] = 0;
             }
         }
     }
 
-    // --- °ñµå °ü¸® ¸Ş¼­µå ---
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            AddGold(30);
+            Debug.Log("[Cheat] í‚¤ë³´ë“œ '1'ë²ˆìœ¼ë¡œ ê³¨ë“œ 30ê°œ ì¶”ê°€ë¨.");
+        }
+    }
 
-    /// <summary>
-    /// ÁöÁ¤µÈ ¾ç¸¸Å­ °ñµå¸¦ Ãß°¡ÇÕ´Ï´Ù.
-    /// </summary>
-    /// <param name="amount">Ãß°¡ÇÒ °ñµåÀÇ ¾çÀÔ´Ï´Ù.</param>
     public void AddGold(int amount)
     {
         currentGold += amount;
         UpdateGoldUI();
-        Debug.Log($"°ñµå È¹µæ: {amount}. ÇöÀç °ñµå: {currentGold}");
-        SaveGoldAndUpgradeLevels(); // °ñµå º¯°æ ½Ã ÀúÀå
+        Debug.Log($"ê³¨ë“œ íšë“: {amount}. í˜„ì¬ ê³¨ë“œ: {currentGold}");
+        SaveGoldAndUpgradeLevels(); // ê³¨ë“œ ë³€ê²½ ì‹œ ì €ì¥
+        RefreshShopUI(); // â¬‡ï¸ [ì¶”ê°€] ê³¨ë“œ ë³€ê²½ ì‹œ ìƒì  UI ê°±ì‹  ìš”ì²­
     }
 
-    /// <summary>
-    /// ÁöÁ¤µÈ ¾ç¸¸Å­ °ñµå¸¦ »ç¿ëÇÕ´Ï´Ù. °ñµå°¡ ÃæºĞÇÏ¸é true¸¦ ¹İÈ¯ÇÏ°í, ¾Æ´Ï¸é false¸¦ ¹İÈ¯ÇÕ´Ï´Ù.
-    /// </summary>
-    /// <param name="amount">»ç¿ëÇÒ °ñµåÀÇ ¾çÀÔ´Ï´Ù.</param>
-    /// <returns>°ñµå »ç¿ë ¼º°ø ¿©ºÎÀÔ´Ï´Ù.</returns>
     public bool SpendGold(int amount)
     {
         if (currentGold >= amount)
         {
             currentGold -= amount;
             UpdateGoldUI();
-            Debug.Log($"°ñµå »ç¿ë: {amount}. ÇöÀç °ñµå: {currentGold}");
-            SaveGoldAndUpgradeLevels(); // °ñµå º¯°æ ½Ã ÀúÀå
+            Debug.Log($"ê³¨ë“œ ì‚¬ìš©: {amount}. í˜„ì¬ ê³¨ë“œ: {currentGold}");
+            SaveGoldAndUpgradeLevels(); // ê³¨ë“œ ë³€ê²½ ì‹œ ì €ì¥
+            RefreshShopUI(); // â¬‡ï¸ [ì¶”ê°€] ê³¨ë“œ ì‚¬ìš© ì‹œ ìƒì  UI ê°±ì‹  ìš”ì²­
             return true;
         }
-        Debug.Log("°ñµå°¡ ºÎÁ·ÇÕ´Ï´Ù.");
+        Debug.Log("ê³¨ë“œê°€ ë¶€ì¡±í•©ë‹ˆë‹¤.");
         return false;
     }
 
     /// <summary>
-    /// UI¿¡ °ñµå Ç¥½Ã¸¦ °»½ÅÇÕ´Ï´Ù.
+    /// UIì— ê³¨ë“œ í‘œì‹œë¥¼ ê°±ì‹ í•©ë‹ˆë‹¤.
     /// </summary>
     private void UpdateGoldUI()
     {
-        if (goldDisplayText != null)
+        if (_goldDisplayText != null)
         {
-            goldDisplayText.text = $"°ñµå: {currentGold}";
+            _goldDisplayText.text = $"ê³¨ë“œ: {currentGold}";
+        }
+        else
+        {
+            Debug.LogWarning("[ShopManager] _goldDisplayTextê°€ í˜„ì¬ ì”¬ì—ì„œ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤. ê³¨ë“œ UIë¥¼ ê°±ì‹ í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
     }
 
-    // --- ¾÷±×·¹ÀÌµå °ü¸® ¸Ş¼­µå ---
+    // â¬‡ï¸ [ì¶”ê°€] í˜„ì¬ ì”¬ì˜ ShopUIë¥¼ ì°¾ì•„ RefreshShopUIë¥¼ í˜¸ì¶œí•˜ëŠ” í—¬í¼ ë©”ì„œë“œ
+    private void RefreshShopUI()
+    {
+        ShopUI shopUI = FindObjectOfType<ShopUI>(true); // ë¹„í™œì„±í™”ëœ ì˜¤ë¸Œì íŠ¸ì— ë¶™ì€ ì»´í¬ë„ŒíŠ¸ë„ ì°¾ë„ë¡
+        if (shopUI != null)
+        {
+            shopUI.RefreshShopUI();
+            Debug.Log("[ShopManager] ShopUI ê°±ì‹  ìš”ì²­ë¨.");
+        }
+        else
+        {
+            Debug.LogWarning("[ShopManager] í˜„ì¬ ì”¬ì—ì„œ ShopUIë¥¼ ì°¾ì„ ìˆ˜ ì—†ì–´ ê°±ì‹ í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+        }
+    }
 
-    /// <summary>
-    /// Æ¯Á¤ ¾ÆÀÌÅÛÀÇ ÇöÀç ¾÷±×·¹ÀÌµå ·¹º§À» °¡Á®¿É´Ï´Ù.
-    /// </summary>
-    /// <param name="itemName">¾ÆÀÌÅÛÀÇ ÀÌ¸§ÀÔ´Ï´Ù.</param>
-    /// <returns>¾ÆÀÌÅÛÀÇ ÇöÀç ·¹º§À» ¹İÈ¯ÇÏ°Å³ª, ÇØ´ç ¾ÆÀÌÅÛÀÌ ¾÷±×·¹ÀÌµå ¸ñ·Ï¿¡ ¾øÀ¸¸é 0À» ¹İÈ¯ÇÕ´Ï´Ù.</returns>
     public int GetItemUpgradeLevel(string itemName)
     {
-        // Dictionary¿¡¼­ ¾ÆÀÌÅÛ ÀÌ¸§À¸·Î ·¹º§À» Ã£°í, ¾øÀ¸¸é ±âº»°ª 0À» ¹İÈ¯ÇÕ´Ï´Ù.
         return itemUpgradeLevels.TryGetValue(itemName, out int level) ? level : 0;
     }
 
     /// <summary>
-    /// Æ¯Á¤ ¾÷±×·¹ÀÌµå Á¤ÀÇ¿¡ ÇØ´çÇÏ´Â ´ÙÀ½ ·¹º§·Î ¾÷±×·¹ÀÌµå¸¦ ½ÃµµÇÕ´Ï´Ù.
+    /// íŠ¹ì • ì—…ê·¸ë ˆì´ë“œ ì •ì˜ì— í•´ë‹¹í•˜ëŠ” ë‹¤ìŒ ë ˆë²¨ë¡œ ì—…ê·¸ë ˆì´ë“œë¥¼ ì‹œë„í•©ë‹ˆë‹¤.
     /// </summary>
-    /// <param name="upgradeDefinition">¾÷±×·¹ÀÌµåÇÒ UpgradeDefinition ¿¡¼ÂÀÔ´Ï´Ù.</param>
-    /// <returns>¾÷±×·¹ÀÌµå ¼º°ø ¿©ºÎÀÔ´Ï´Ù.</returns>
+    /// <param name="upgradeDefinition">ì—…ê·¸ë ˆì´ë“œí•  UpgradeDefinition ì—ì…‹ì…ë‹ˆë‹¤.</param>
+    /// <returns>ì—…ê·¸ë ˆì´ë“œ ì„±ê³µ ì—¬ë¶€ì…ë‹ˆë‹¤.</returns>
     public bool TryUpgradeItem(UpgradeDefinition upgradeDefinition)
     {
         if (upgradeDefinition == null || upgradeDefinition.targetItemData == null)
         {
-            Debug.LogWarning("À¯È¿ÇÏÁö ¾ÊÀº ¾÷±×·¹ÀÌµå Á¤ÀÇ ¶Ç´Â ´ë»ó ¾ÆÀÌÅÛ µ¥ÀÌÅÍÀÔ´Ï´Ù.");
+            Debug.LogWarning("ìœ íš¨í•˜ì§€ ì•Šì€ ì—…ê·¸ë ˆì´ë“œ ì •ì˜ ë˜ëŠ” ëŒ€ìƒ ì•„ì´í…œ ë°ì´í„°ì…ë‹ˆë‹¤.");
             return false;
         }
 
-        string itemName = upgradeDefinition.targetItemData.itemName;
+        UpgradeDefinition upgradeDef = upgradeDefinition;
+
+        Debug.Log($"[ShopManager] '{upgradeDef.upgradeTitle}' ì—…ê·¸ë ˆì´ë“œ ì‹œë„. ëŒ€ìƒ ì•„ì´í…œ: '{upgradeDef.targetItemData.itemName}'.");
+
+        string itemName = upgradeDef.targetItemData.itemName;
         int currentLevel = GetItemUpgradeLevel(itemName);
 
-        // ÃÖ´ë ·¹º§¿¡ µµ´ŞÇß´ÂÁö È®ÀÎ
-        if (currentLevel >= upgradeDefinition.maxLevel)
+        if (currentLevel >= upgradeDef.maxLevel)
         {
-            Debug.Log($"'{itemName}'Àº(´Â) ÀÌ¹Ì ÃÖ´ë ·¹º§ÀÔ´Ï´Ù. (·¹º§: {currentLevel}/{upgradeDefinition.maxLevel})");
+            Debug.Log($"'{itemName}'ì€(ëŠ”) ì´ë¯¸ ìµœëŒ€ ë ˆë²¨ì…ë‹ˆë‹¤. (ë ˆë²¨: {currentLevel}/{upgradeDef.maxLevel})");
             return false;
         }
 
-        // ´ÙÀ½ ·¹º§ ¾÷±×·¹ÀÌµå ºñ¿ëÀ» °¡Á®¿É´Ï´Ù.
-        int upgradeCost = upgradeDefinition.GetCostForLevel(currentLevel + 1);
+        int upgradeCost = upgradeDef.GetCostForLevel(currentLevel + 1);
         if (upgradeCost == -1)
         {
-            Debug.LogWarning($"'{itemName}'ÀÇ ·¹º§ {currentLevel + 1} ¾÷±×·¹ÀÌµå ºñ¿ëÀÌ Á¤ÀÇµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogWarning($"'{itemName}'ì˜ ë ˆë²¨ {currentLevel + 1} ì—…ê·¸ë ˆì´ë“œ ë¹„ìš©ì´ ì •ì˜ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
             return false;
         }
 
-        // °ñµå »ç¿ë ½Ãµµ
         if (SpendGold(upgradeCost))
         {
-            itemUpgradeLevels[itemName] = currentLevel + 1; // ·¹º§ Áõ°¡
-            Debug.Log($"'{itemName}'À»(¸¦) ·¹º§ {itemUpgradeLevels[itemName]}·Î ¾÷±×·¹ÀÌµåÇß½À´Ï´Ù! ºñ¿ë: {upgradeCost}");
-            SaveGoldAndUpgradeLevels(); // ·¹º§ º¯°æ ½Ã ÀúÀå
-            // ShopUI°¡ RefreshShopUI¸¦ È£ÃâÇÏ¿© UI¸¦ °»½ÅÇÏµµ·Ï ÇÕ´Ï´Ù.
+            itemUpgradeLevels[itemName] = currentLevel + 1;
+            Debug.Log($"[ShopManager] '{itemName}'ì„(ë¥¼) ë ˆë²¨ {itemUpgradeLevels[itemName]}ë¡œ ì—…ê·¸ë ˆì´ë“œí–ˆìŠµë‹ˆë‹¤! ë¹„ìš©: {upgradeCost}");
+            SaveGoldAndUpgradeLevels();
             return true;
         }
-        return false; // °ñµå ºÎÁ·À¸·Î ¾÷±×·¹ÀÌµå ½ÇÆĞ
+        return false;
     }
 
     /// <summary>
-    /// ¾÷±×·¹ÀÌµå °¡´ÉÇÑ BaseItemData¸¦ ÀÌ¸§À¸·Î Ã£½À´Ï´Ù.
+    /// ì—…ê·¸ë ˆì´ë“œ ê°€ëŠ¥í•œ BaseItemDataë¥¼ ì´ë¦„ìœ¼ë¡œ ì°¾ìŠµë‹ˆë‹¤.
     /// </summary>
-    /// <param name="itemName">Ã£À» ¾ÆÀÌÅÛÀÇ ÀÌ¸§ÀÔ´Ï´Ù.</param>
-    /// <returns>ÇØ´çÇÏ´Â BaseItemData ¶Ç´Â null.</returns>
+    /// <param name="itemName">ì°¾ì„ ì•„ì´í…œì˜ ì´ë¦„ì…ë‹ˆë‹¤.</param>
+    /// <returns>í•´ë‹¹í•˜ëŠ” BaseItemData ë˜ëŠ” null.</returns>
     public BaseItemData GetUpgradeableItemDataByName(string itemName)
     {
-        // allUpgradeDefinitions ¸ñ·Ï¿¡¼­ ´ë»ó ¾ÆÀÌÅÛ ÀÌ¸§°ú ÀÏÄ¡ÇÏ´Â UpgradeDefinitionÀ» Ã£¾Æ
-        // ±× Á¤ÀÇ¿¡ ¿¬°áµÈ targetItemData¸¦ ¹İÈ¯ÇÕ´Ï´Ù.
-        // ÀÌ´Â ShopUI µî¿¡¼­ UpgradeDefinitionÀ» ÅëÇØ ItemData¿¡ Á¢±ÙÇÒ ¶§ »ç¿ëµË´Ï´Ù.
         var upgradeDef = allUpgradeDefinitions.Find(def => def.targetItemData != null && def.targetItemData.itemName == itemName);
         return upgradeDef?.targetItemData;
     }
 
-    // --- ÀúÀå/·Îµå ½Ã½ºÅÛ ---
+    // --- ì €ì¥/ë¡œë“œ ì‹œìŠ¤í…œ ---
 
-    // ÀúÀå µ¥ÀÌÅÍ¸¦ À§ÇÑ Á÷·ÄÈ­ °¡´ÉÇÑ Å¬·¡½º
     [System.Serializable]
     private class ShopSaveData
     {
-        public int gold; // ÇöÀç °ñµå
-        public List<UpgradeLevelEntry> upgradeLevels; // ¾ÆÀÌÅÛº° ¾÷±×·¹ÀÌµå ·¹º§ ¸ñ·Ï
+        public int gold;
+        public List<UpgradeLevelEntry> upgradeLevels;
     }
 
-    // °¢ ¾ÆÀÌÅÛÀÇ ¾÷±×·¹ÀÌµå ·¹º§ ¿£Æ®¸®
     [System.Serializable]
     private class UpgradeLevelEntry
     {
@@ -186,25 +221,18 @@ public class ShopManager : MonoBehaviour
         public int level;
     }
 
-    /// <summary>
-    /// ÇöÀç °ñµå¿Í ¸ğµç ¾ÆÀÌÅÛÀÇ ¾÷±×·¹ÀÌµå ·¹º§À» ÆÄÀÏ¿¡ ÀúÀåÇÕ´Ï´Ù.
-    /// </summary>
     public void SaveGoldAndUpgradeLevels()
     {
-        // DictionaryÀÇ ³»¿ëÀ» Á÷·ÄÈ­ °¡´ÉÇÑ List·Î º¯È¯ÇÕ´Ï´Ù.
         List<UpgradeLevelEntry> entries = itemUpgradeLevels
             .Select(kv => new UpgradeLevelEntry { itemName = kv.Key, level = kv.Value })
             .ToList();
 
         ShopSaveData data = new ShopSaveData { gold = currentGold, upgradeLevels = entries };
-        string json = JsonUtility.ToJson(data, true); // (true: °¡µ¶¼º ÁÁ°Ô Æ÷¸ËÆÃ)
+        string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(shopSavePath, json);
-        Debug.Log("»óÁ¡ µ¥ÀÌÅÍ ¹× ¾÷±×·¹ÀÌµå ·¹º§ ÀúÀåµÊ.");
+        Debug.Log("ìƒì  ë°ì´í„° ë° ì—…ê·¸ë ˆì´ë“œ ë ˆë²¨ ì €ì¥ë¨.");
     }
 
-    /// <summary>
-    /// ÀúÀåµÈ °ñµå¿Í ¾ÆÀÌÅÛ ¾÷±×·¹ÀÌµå ·¹º§À» ÆÄÀÏ¿¡¼­ ºÒ·¯¿É´Ï´Ù.
-    /// </summary>
     public void LoadGoldAndUpgradeLevels()
     {
         if (File.Exists(shopSavePath))
@@ -213,19 +241,36 @@ public class ShopManager : MonoBehaviour
             ShopSaveData data = JsonUtility.FromJson<ShopSaveData>(json);
 
             currentGold = data.gold;
-            itemUpgradeLevels.Clear(); // ±âÁ¸ µ¥ÀÌÅÍ ÃÊ±âÈ­
-
-            // ºÒ·¯¿Â ·¹º§ µ¥ÀÌÅÍ¸¦ Dictionary¿¡ ´Ù½Ã Ã¤¿ó´Ï´Ù.
+            itemUpgradeLevels.Clear();
             foreach (var entry in data.upgradeLevels)
             {
                 itemUpgradeLevels[entry.itemName] = entry.level;
             }
-            Debug.Log("»óÁ¡ µ¥ÀÌÅÍ ¹× ¾÷±×·¹ÀÌµå ·¹º§ ·ÎµåµÊ.");
+            Debug.Log("ìƒì  ë°ì´í„° ë° ì—…ê·¸ë ˆì´ë“œ ë ˆë²¨ ë¡œë“œë¨.");
         }
         else
         {
-            Debug.Log("»óÁ¡ ÀúÀå ÆÄÀÏÀÌ ¾ø½À´Ï´Ù. ÃÊ±â °ñµå ¹× ·¹º§·Î ½ÃÀÛÇÕ´Ï´Ù.");
-            currentGold = 0; // ÀúÀå ÆÄÀÏÀÌ ¾øÀ¸¸é °ñµå¸¦ 0À¸·Î ÃÊ±âÈ­
+            Debug.Log("ìƒì  ì €ì¥ íŒŒì¼ì´ ì—†ìŠµë‹ˆë‹¤. ì´ˆê¸° ê³¨ë“œ ë° ë ˆë²¨ë¡œ ì‹œì‘í•©ë‹ˆë‹¤.");
+            currentGold = 0;
         }
+    }
+
+    public void ResetShopData()
+    {
+        currentGold = 0;
+        itemUpgradeLevels.Clear();
+
+        foreach (var upgradeDef in allUpgradeDefinitions)
+        {
+            if (upgradeDef.targetItemData != null)
+            {
+                itemUpgradeLevels[upgradeDef.targetItemData.itemName] = 0;
+            }
+        }
+        SaveGoldAndUpgradeLevels();
+        Debug.Log("[ShopManager] ìƒì  ë°ì´í„° ë° ì—…ê·¸ë ˆì´ë“œ ë ˆë²¨ì´ ì´ˆê¸°í™”ë˜ì—ˆìŠµë‹ˆë‹¤.");
+
+        UpdateGoldUI(); // ê³¨ë“œ UIë§Œ ì¦‰ì‹œ ë°˜ì˜
+        RefreshShopUI(); // â¬‡ï¸ [ì¶”ê°€] ë¦¬ì…‹ í›„ ìƒì  UI ê°±ì‹  ìš”ì²­
     }
 }

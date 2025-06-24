@@ -15,5 +15,5 @@ MonoBehaviour:
   targetItemData: {fileID: 11400000, guid: d23d1e7c303aca04dbdb1ae5c671e1cf, type: 2}
   costs: 03000000070000000f000000
   maxLevel: 3
-  upgradeTitle: "\uC2DC\uAC04 \uCD94\uAC00"
+  upgradeTitle: "\uACE0\uC7A5\uB09C \uD68C\uC911\uC2DC\uACC4"
   effectDescriptionFormat: '{0} -> {1}'

@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb8ef4332859fe649a9904cfd998b0f0, type: 3}
   m_Name: NewPlusTimeItem
   m_EditorClassIdentifier: 
-  timeToAdd: 5
+  itemName: Plus Time Item
+  icon: {fileID: 21300000, guid: 8b5254079ff2ff6438457cb7b42c588d, type: 3}
+  baseTimeToAdd: 5
+  timeToAddPerLevel: 1
   point: 0
-  itemName: 
-  icon: {fileID: 21300000, guid: 2495ce8068c5d0e4d99a0c4eebd43e5e, type: 3}

@@ -1,94 +1,123 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // TextMeshPro¸¦ »ç¿ëÇÏ¹Ç·Î ÇÊ¿äÇÕ´Ï´Ù.
+using TMPro;
 
 public class ShopUI : MonoBehaviour
 {
-    [Header("UI ÂüÁ¶")]
-    public GameObject shopPanel; // »óÁ¡ ÀüÃ¼ ÆĞ³Î (È°¼ºÈ­/ºñÈ°¼ºÈ­)
-    public TextMeshProUGUI goldText; // ShopManagerÀÇ goldDisplayText¿Í µ¿ÀÏÇÑ TextMeshProUGUI
+    [Header("UI ì°¸ì¡°")]
+    public GameObject shopPanel;
+    public TextMeshProUGUI goldText;
 
-    [Header("¾÷±×·¹ÀÌµå ½½·Ô UI")]
-    [Tooltip("Inspector¿¡¼­ °¢ ¾÷±×·¹ÀÌµå ¿É¼Ç¿¡ ÇØ´çÇÏ´Â UI ¿ä¼Ò¸¦ ¿¬°áÇÏ¼¼¿ä.")]
-    public List<ShopUpgradeSlotUI> upgradeSlots; // °¢ ¾÷±×·¹ÀÌµå ¿É¼Ç UI ¿ä¼Ò ¸ñ·Ï
+    [Header("ì—…ê·¸ë ˆì´ë“œ ìŠ¬ë¡¯ UI")]
+    public List<ShopUpgradeSlotUI> upgradeSlots;
 
     void Start()
     {
-        shopPanel.SetActive(false); // °ÔÀÓ ½ÃÀÛ ½Ã »óÁ¡ UI´Â ¼û±è
-        RefreshShopUI(); // ÃÊ±â UI °»½Å
+        Debug.Log("[ShopUI] Start ë©”ì„œë“œ ì‹œì‘. shopPanel ë¹„í™œì„±í™”.");
+        shopPanel.SetActive(false); // ê²Œì„ ì‹œì‘ ì‹œ ìƒì  UIëŠ” ìˆ¨ê¹€ (OnEnableì—ì„œ ê°±ì‹ )
+        // RefreshShopUI(); // â¬‡ï¸ [ìˆ˜ì •] Startì—ì„œëŠ” RefreshShopUI í˜¸ì¶œí•˜ì§€ ì•ŠìŒ (OnEnableì—ì„œ í•  ê²ƒì„)
+        Debug.Log("[ShopUI] Start ë©”ì„œë“œ ì™„ë£Œ.");
     }
 
-    /// <summary>
-    /// »óÁ¡ UI¸¦ ¿­°í °»½ÅÇÕ´Ï´Ù.
-    /// </summary>
+    void OnEnable()
+    {
+        // â¬‡ï¸ [ì¶”ê°€] GameObjectê°€ í™œì„±í™”ë  ë•Œë§ˆë‹¤ UIë¥¼ ê°±ì‹ í•©ë‹ˆë‹¤. (ì”¬ ë¡œë“œ í›„ì—ë„ í™•ì‹¤í•˜ê²Œ ê°±ì‹ )
+        Debug.Log("[ShopUI] OnEnable ë©”ì„œë“œ ì‹œì‘. RefreshShopUI í˜¸ì¶œ.");
+        RefreshShopUI();
+        Debug.Log("[ShopUI] OnEnable ë©”ì„œë“œ ì™„ë£Œ.");
+    }
+
     public void OpenShop()
     {
-        shopPanel.SetActive(true); // »óÁ¡ ÆĞ³Î È°¼ºÈ­
-        RefreshShopUI(); // »óÁ¡ UI ³»¿ë °»½Å
-        Debug.Log("»óÁ¡ ¿­¸².");
+        Debug.Log("[ShopUI] OpenShop ë©”ì„œë“œ í˜¸ì¶œë¨.");
+        shopPanel.SetActive(true);
+        RefreshShopUI(); // ìƒì  ì—´ë¦´ ë•Œë„ ê°±ì‹ 
+        Debug.Log("[ShopUI] ìƒì  ì—´ë¦¼.");
     }
 
-    /// <summary>
-    /// »óÁ¡ UI¸¦ ´İ½À´Ï´Ù.
-    /// </summary>
     public void CloseShop()
     {
-        shopPanel.SetActive(false); // »óÁ¡ ÆĞ³Î ºñÈ°¼ºÈ­
-        Debug.Log("»óÁ¡ ´İÈû.");
+        Debug.Log("[ShopUI] CloseShop ë©”ì„œë“œ í˜¸ì¶œë¨.");
+        shopPanel.SetActive(false);
+        Debug.Log("[ShopUI] ìƒì  ë‹«í˜.");
+        Time.timeScale = 1f; // ê²Œì„ ì‹œê°„ ì¬ê°œ
     }
 
-    /// <summary>
-    /// »óÁ¡ UIÀÇ ¸ğµç ¿ä¼Ò¸¦ ÇöÀç °ñµå¿Í ¾ÆÀÌÅÛ ¾÷±×·¹ÀÌµå ·¹º§¿¡ ¸ÂÃç °»½ÅÇÕ´Ï´Ù.
-    /// </summary>
     public void RefreshShopUI()
     {
+        Debug.Log("[ShopUI] RefreshShopUI ë©”ì„œë“œ ì‹œì‘.");
+
         if (ShopManager.Instance == null)
         {
-            Debug.LogWarning("ShopManager.Instance¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù. »óÁ¡ UI¸¦ °»½ÅÇÒ ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("ShopManager.Instanceê°€ Nullì…ë‹ˆë‹¤. ShopManager GameObjectê°€ ì”¬ì— ìˆëŠ”ì§€, ìŠ¤í¬ë¦½íŠ¸ ì‹¤í–‰ ìˆœì„œê°€ ì˜¬ë°”ë¥¸ì§€ í™•ì¸í•˜ì„¸ìš”.");
             return;
         }
+        Debug.Log($"[ShopUI] ShopManager.Instance ì°¾ìŒ. í˜„ì¬ ê³¨ë“œ: {ShopManager.Instance.currentGold}");
 
-        // 1. °ñµå UI °»½Å (ShopManager°¡ ÀÌ¹Ì TextMeshProUGUI¸¦ Á÷Á¢ °ü¸®ÇÏ¹Ç·Î ¿©±â¼­´Â »ı·« °¡´É)
-        // ShopManager.Instance.UpdateGoldUI()°¡ È£ÃâµÉ ¶§¸¶´Ù ÀÚµ¿À¸·Î °»½ÅµË´Ï´Ù.
-        // ÇÏÁö¸¸ È¤½Ã ¸ğ¸¦ °æ¿ì¸¦ ´ëºñÇØ Á÷Á¢ ÂüÁ¶ÇÒ ¼öµµ ÀÖ½À´Ï´Ù.
         if (goldText != null)
         {
-            goldText.text = $"°ñµå: {ShopManager.Instance.currentGold}";
+            goldText.text = $"ê³¨ë“œ: {ShopManager.Instance.currentGold}";
+        }
+        else
+        {
+            Debug.LogWarning("[ShopUI] goldText (ê³¨ë“œ í‘œì‹œ í…ìŠ¤íŠ¸)ê°€ ShopUI Inspectorì— í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
         }
 
-
-        // 2. °¢ ¾÷±×·¹ÀÌµå ½½·Ô UI °»½Å
-        foreach (ShopUpgradeSlotUI slot in upgradeSlots)
+        if (upgradeSlots == null || upgradeSlots.Count == 0)
         {
+            Debug.LogError("ShopUIì˜ 'Upgrade Slots' ë¦¬ìŠ¤íŠ¸ê°€ ë¹„ì–´ìˆê±°ë‚˜ Nullì…ë‹ˆë‹¤. Inspectorì—ì„œ ìŠ¬ë¡¯ì„ ì¶”ê°€í•˜ê³  ì—°ê²°í•´ì£¼ì„¸ìš”!");
+            return;
+        }
+        Debug.Log($"[ShopUI] 'Upgrade Slots' ë¦¬ìŠ¤íŠ¸ì— {upgradeSlots.Count}ê°œì˜ ìŠ¬ë¡¯ì´ ìˆìŠµë‹ˆë‹¤.");
+
+
+        for (int i = 0; i < upgradeSlots.Count; i++)
+        {
+            ShopUpgradeSlotUI slot = upgradeSlots[i];
+            Debug.Log($"\n[ShopUI] --- ìŠ¬ë¡¯ {i} ì²˜ë¦¬ ì‹œì‘ ---");
+
+            if (slot.itemNameText == null) { Debug.LogError($"[ShopUI] ì˜¤ë¥˜: ìŠ¬ë¡¯ {i}ì˜ 'Item Name Text'ê°€ Nullì…ë‹ˆë‹¤. Inspectorì—ì„œ ì—°ê²°í•´ì£¼ì„¸ìš”! ê²½ë¡œ: {GetGameObjectPath(slot.itemNameText?.gameObject)}"); continue; }
+            if (slot.levelText == null) { Debug.LogError($"[ShopUI] ì˜¤ë¥˜: ìŠ¬ë¡¯ {i}ì˜ 'Level Text'ê°€ Nullì…ë‹ˆë‹¤. Inspectorì—ì„œ ì—°ê²°í•´ì£¼ì„¸ìš”! ê²½ë¡œ: {GetGameObjectPath(slot.levelText?.gameObject)}"); continue; }
+            if (slot.costText == null) { Debug.LogError($"[ShopUI] ì˜¤ë¥˜: ìŠ¬ë¡¯ {i}ì˜ 'Cost Text'ê°€ Nullì…ë‹ˆë‹¤. Inspectorì—ì„œ ì—°ê²°í•´ì£¼ì„¸ìš”! ê²½ë¡œ: {GetGameObjectPath(slot.costText?.gameObject)}"); continue; }
+            if (slot.effectDescriptionText == null) { Debug.LogError($"[ShopUI] ì˜¤ë¥˜: ìŠ¬ë¡¯ {i}ì˜ 'Effect Description Text'ê°€ Nullì…ë‹ˆë‹¤. Inspectorì—ì„œ ì—°ê²°í•´ì£¼ì„¸ìš”! ê²½ë¡œ: {GetGameObjectPath(slot.effectDescriptionText?.gameObject)}"); continue; }
+            if (slot.upgradeButton == null) { Debug.LogError($"[ShopUI] ì˜¤ë¥˜: ìŠ¬ë¡¯ {i}ì˜ 'Upgrade Button'ì´ Nullì…ë‹ˆë‹¤. Inspectorì—ì„œ ì—°ê²°í•´ì£¼ì„¸ìš”! ê²½ë¡œ: {GetGameObjectPath(slot.upgradeButton?.gameObject)}"); continue; }
+
             if (slot.linkedUpgradeDefinition == null)
             {
-                Debug.LogWarning("ShopUpgradeSlotUI¿¡ ¿¬°áµÈ UpgradeDefinitionÀÌ ¾ø½À´Ï´Ù.");
+                Debug.LogError($"[ShopUI] ì˜¤ë¥˜: ìŠ¬ë¡¯ {i}ì˜ 'Linked Upgrade Definition'ì´ Nullì…ë‹ˆë‹¤. Inspectorì—ì„œ UpgradeDefinition ì—ì…‹ì„ í• ë‹¹í•´ì£¼ì„¸ìš”!");
+                slot.itemNameText.text = "ì˜¤ë¥˜: ì •ì˜ ì—†ìŒ";
+                slot.levelText.text = "";
+                slot.costText.text = "";
+                slot.effectDescriptionText.text = "";
+                slot.upgradeButton.interactable = false;
                 continue;
             }
 
             UpgradeDefinition upgradeDef = slot.linkedUpgradeDefinition;
-            string itemName = upgradeDef.targetItemData?.itemName;
+            Debug.Log($"[ShopUI] ìŠ¬ë¡¯ {i}ì— ì—°ê²°ëœ UpgradeDefinition: '{upgradeDef.name}'.");
 
-            if (itemName == null)
+            if (upgradeDef.targetItemData == null)
             {
-                Debug.LogWarning($"UpgradeDefinition '{upgradeDef.name}'¿¡ À¯È¿ÇÑ targetItemData°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
-                slot.upgradeButton.interactable = false;
-                slot.itemNameText.text = "¿À·ù: ¾ÆÀÌÅÛ ¾øÀ½";
+                Debug.LogError($"[ShopUI] ì˜¤ë¥˜: UpgradeDefinition '{upgradeDef.name}'ì˜ 'Target Item Data'ê°€ Nullì…ë‹ˆë‹¤. BaseItemData ì—ì…‹ì„ í• ë‹¹í•´ì£¼ì„¸ìš”!");
+                slot.itemNameText.text = "ì˜¤ë¥˜: ì•„ì´í…œ ë°ì´í„° ì—†ìŒ";
                 slot.levelText.text = "";
                 slot.costText.text = "";
                 slot.effectDescriptionText.text = "";
+                slot.upgradeButton.interactable = false;
                 continue;
             }
 
+            string itemName = upgradeDef.targetItemData.itemName;
             int currentLevel = ShopManager.Instance.GetItemUpgradeLevel(itemName);
             int nextCost = upgradeDef.GetCostForLevel(currentLevel + 1);
 
-            // UI ÅØ½ºÆ® °»½Å
-            slot.itemNameText.text = upgradeDef.upgradeTitle;
-            slot.levelText.text = $"·¹º§: {currentLevel}/{upgradeDef.maxLevel}";
+            Debug.Log($"[ShopUI] ìŠ¬ë¡¯ {i} ({itemName}) - í˜„ì¬ ê³¨ë“œ: {ShopManager.Instance.currentGold}, ë‹¤ìŒ ë¹„ìš©: {nextCost}");
+            Debug.Log($"[ShopUI] ìŠ¬ë¡¯ {i} ({itemName}) - í˜„ì¬ ë ˆë²¨: {currentLevel}, ìµœëŒ€ ë ˆë²¨: {upgradeDef.maxLevel}");
 
-            // È¿°ú ¼³¸í ÅØ½ºÆ® °»½Å (ÇöÀç °ª -> ´ÙÀ½ °ª)
+            slot.itemNameText.text = upgradeDef.upgradeTitle;
+            slot.levelText.text = $"ë ˆë²¨: {currentLevel}/{upgradeDef.maxLevel}";
+
             string currentEffect = upgradeDef.GetCurrentEffectValueString(currentLevel);
             string nextEffect = upgradeDef.GetNextEffectValueString(currentLevel);
             if (currentLevel < upgradeDef.maxLevel)
@@ -97,67 +126,77 @@ public class ShopUI : MonoBehaviour
             }
             else
             {
-                slot.effectDescriptionText.text = $"{upgradeDef.effectDescriptionFormat.Replace("{0} -> {1}", currentEffect)} (ÃÖ´ë ·¹º§)";
+                slot.effectDescriptionText.text = $"{string.Format(upgradeDef.effectDescriptionFormat.Replace("{0} -> {1}", "{0}"), currentEffect)} (ìµœëŒ€ ë ˆë²¨)";
             }
 
-
-            // ¹öÆ° »óÈ£ÀÛ¿ë °¡´É ¿©ºÎ ¼³Á¤
             if (currentLevel >= upgradeDef.maxLevel)
             {
                 slot.costText.text = "MAX";
-                slot.upgradeButton.interactable = false; // ÃÖ´ë ·¹º§ÀÌ¸é ºñÈ°¼ºÈ­
+                slot.upgradeButton.interactable = false;
+                Debug.Log($"[ShopUI] ìŠ¬ë¡¯ {i} ({itemName}): ìµœëŒ€ ë ˆë²¨ ë„ë‹¬. ë²„íŠ¼ ë¹„í™œì„±í™”.");
             }
             else if (ShopManager.Instance.currentGold >= nextCost)
             {
-                slot.costText.text = $"ºñ¿ë: {nextCost} °ñµå";
-                slot.upgradeButton.interactable = true; // °ñµå°¡ ÃæºĞÇÏ¸é È°¼ºÈ­
+                slot.costText.text = $"ë¹„ìš©: {nextCost} ê³¨ë“œ";
+                slot.upgradeButton.interactable = true;
+                Debug.Log($"[ShopUI] ìŠ¬ë¡¯ {i} ({itemName}): ê³¨ë“œ ì¶©ë¶„. ë²„íŠ¼ í™œì„±í™”!");
             }
             else
             {
-                slot.costText.text = $"ºñ¿ë: {nextCost} °ñµå"; // °ñµå ºÎÁ· ½Ã¿¡µµ ºñ¿ëÀº Ç¥½Ã
-                slot.upgradeButton.interactable = false; // °ñµå ºÎÁ· ½Ã ºñÈ°¼ºÈ­
+                slot.costText.text = $"ë¹„ìš©: {nextCost} ê³¨ë“œ";
+                slot.upgradeButton.interactable = false;
+                Debug.Log($"[ShopUI] ìŠ¬ë¡¯ {i} ({itemName}): ê³¨ë“œ ë¶€ì¡±. ë²„íŠ¼ ë¹„í™œì„±í™”.");
             }
 
-            // ¹öÆ° Å¬¸¯ ¸®½º³Ê Ãß°¡ (·±Å¸ÀÓ¿¡ µ¿ÀûÀ¸·Î Ãß°¡)
-            // ±âÁ¸ ¸®½º³Ê Á¦°Å ÈÄ Ãß°¡ÇÏ¿© Áßº¹ È£Ãâ ¹æÁö
             slot.upgradeButton.onClick.RemoveAllListeners();
             slot.upgradeButton.onClick.AddListener(() => OnUpgradeButtonClicked(upgradeDef));
+            Debug.Log($"[ShopUI] --- ìŠ¬ë¡¯ {i} ì²˜ë¦¬ ì™„ë£Œ ---\n");
         }
+        Debug.Log("[ShopUI] RefreshShopUI ë©”ì„œë“œ ì™„ë£Œ.");
     }
 
-    /// <summary>
-    /// ¾÷±×·¹ÀÌµå ¹öÆ°ÀÌ Å¬¸¯µÇ¾úÀ» ¶§ È£ÃâµË´Ï´Ù.
-    /// </summary>
-    /// <param name="upgradeDef">Å¬¸¯µÈ ¹öÆ°¿¡ ¿¬°áµÈ UpgradeDefinition ¿¡¼ÂÀÔ´Ï´Ù.</param>
     public void OnUpgradeButtonClicked(UpgradeDefinition upgradeDef)
     {
+        Debug.Log($"[ShopUI] ì—…ê·¸ë ˆì´ë“œ ë²„íŠ¼ í´ë¦­ë¨: '{upgradeDef.name}'. ëŒ€ìƒ ì•„ì´í…œ: '{upgradeDef.targetItemData?.itemName ?? "ì—†ìŒ"}'.");
+
         if (ShopManager.Instance == null)
         {
-            Debug.LogWarning("ShopManager.Instance¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("ShopManager.Instanceë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ì—…ê·¸ë ˆì´ë“œ ë¶ˆê°€.");
             return;
         }
 
-        // ShopManager¸¦ ÅëÇØ ¾÷±×·¹ÀÌµå¸¦ ½ÃµµÇÕ´Ï´Ù.
         if (ShopManager.Instance.TryUpgradeItem(upgradeDef))
         {
-            // ¾÷±×·¹ÀÌµå ¼º°ø ½Ã UI¸¦ ´Ù½Ã °»½ÅÇÏ¿© º¯°æµÈ ·¹º§, ºñ¿ë µîÀ» ¹İ¿µÇÕ´Ï´Ù.
             RefreshShopUI();
+            Debug.Log($"[ShopUI] ì—…ê·¸ë ˆì´ë“œ ì„±ê³µ! UI ê°±ì‹ ë¨.");
         }
-        // ½ÇÆĞ ½Ã (°ñµå ºÎÁ·, ÃÖ´ë ·¹º§ µî) ShopManager¿¡¼­ ÀÌ¹Ì ·Î±×¸¦ Ãâ·ÂÇÕ´Ï´Ù.
+        else
+        {
+            Debug.LogWarning($"[ShopUI] ì—…ê·¸ë ˆì´ë“œ ì‹¤íŒ¨. í˜„ì¬ ê³¨ë“œ: {ShopManager.Instance.currentGold}.");
+        }
     }
 
-    // Äü ½½·Ô UIÀÇ °¢ ¿ä¼Ò¿¡ ´ëÇÑ ±¸Á¶Ã¼ (Inspector¿¡¼­ ¿¬°áÇÏ±â ¿ëÀÌÇÏµµ·Ï)
-    // ÀÌ Å¬·¡½º´Â ShopUI ½ºÅ©¸³Æ®ÀÇ ÇÏÀ§·Î Á¤ÀÇµË´Ï´Ù.
     [System.Serializable]
     public class ShopUpgradeSlotUI
     {
-        [Tooltip("ÀÌ UI ½½·ÔÀÌ ¾î¶² ¾÷±×·¹ÀÌµå Á¤ÀÇ¿¡ ¿¬°áµÉÁö ÇÒ´çÇÏ¼¼¿ä.")]
-        public UpgradeDefinition linkedUpgradeDefinition; // ¿¬°áµÉ UpgradeDefinition ¿¡¼Â
+        public UpgradeDefinition linkedUpgradeDefinition;
+        public TextMeshProUGUI itemNameText;
+        public TextMeshProUGUI levelText;
+        public TextMeshProUGUI costText;
+        public TextMeshProUGUI effectDescriptionText;
+        public Button upgradeButton;
+    }
 
-        public TextMeshProUGUI itemNameText;     // ¾ÆÀÌÅÛ ÀÌ¸§/¾÷±×·¹ÀÌµå Á¦¸ñ Ç¥½Ã
-        public TextMeshProUGUI levelText;        // ÇöÀç ·¹º§ Ç¥½Ã (¿¹: "Lv. 1/3")
-        public TextMeshProUGUI costText;         // ´ÙÀ½ ·¹º§ ¾÷±×·¹ÀÌµå ºñ¿ë Ç¥½Ã
-        public TextMeshProUGUI effectDescriptionText; // È¿°ú º¯°æ ¼³¸í (¿¹: "½Ã°£: 5ÃÊ -> 6ÃÊ")
-        public Button upgradeButton;              // ¾÷±×·¹ÀÌµå ¹öÆ°
+    private string GetGameObjectPath(GameObject obj)
+    {
+        if (obj == null) return "Null GameObject";
+        string path = obj.name;
+        Transform current = obj.transform;
+        while (current.parent != null)
+        {
+            current = current.parent;
+            path = current.name + "/" + path;
+        }
+        return path;
     }
 }
