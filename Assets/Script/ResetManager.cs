@@ -59,19 +59,19 @@ public class ResetManager : MonoBehaviour
         }
 
         // 3. InventorySystem 데이터 초기화
-        // ResetAllGameData()가 호출될 때 싱글톤 인스턴스가 아직 설정되지 않았을 수 있으므로 다시 Find
         if (inventorySystem == null)
         {
-            inventorySystem = InventorySystem.Instance; // 씬 로드 후에는 Instance가 설정되어 있을 가능성이 높음
+            inventorySystem = InventorySystem.Instance;
         }
         if (inventorySystem == null)
         {
-            inventorySystem = FindObjectOfType<InventorySystem>(); // 그래도 없으면 직접 찾기 (비활성 오브젝트도 찾으려면 FindObjectOfType<InventorySystem>(true) 사용)
+            // FindObjectOfType(true)를 사용하여 비활성화된 오브젝트에 붙은 컴포넌트도 찾도록 합니다.
+            inventorySystem = FindObjectOfType<InventorySystem>(true);
         }
 
         if (inventorySystem != null)
         {
-            inventorySystem.ResetInventoryData(); // InventorySystem의 ResetInventoryData() 호출
+            inventorySystem.ResetInventoryData();
             Debug.Log("[ResetManager] 인벤토리 시스템 초기화 요청 완료.");
         }
         else
@@ -80,19 +80,19 @@ public class ResetManager : MonoBehaviour
         }
 
         // 4. ShopManager 데이터 초기화
-        // ResetAllGameData()가 호출될 때 싱글톤 인스턴스가 아직 설정되지 않았을 수 있으므로 다시 Find
         if (shopManager == null)
         {
-            shopManager = ShopManager.Instance; // 씬 로드 후에는 Instance가 설정되어 있을 가능성이 높음
+            shopManager = ShopManager.Instance;
         }
         if (shopManager == null)
         {
-            shopManager = FindObjectOfType<ShopManager>(); // 그래도 없으면 직접 찾기 (비활성 오브젝트도 찾으려면 FindObjectOfType<ShopManager>(true) 사용)
+            // FindObjectOfType(true)를 사용하여 비활성화된 오브젝트에 붙은 컴포넌트도 찾도록 합니다.
+            shopManager = FindObjectOfType<ShopManager>(true);
         }
 
         if (shopManager != null)
         {
-            shopManager.ResetShopData(); // ShopManager의 ResetShopData() 호출
+            shopManager.ResetShopData();
             Debug.Log("[ResetManager] 상점 시스템 초기화 요청 완료.");
         }
         else
@@ -104,7 +104,6 @@ public class ResetManager : MonoBehaviour
 
         // 모든 데이터가 초기화된 후, 게임을 메인 메뉴로 돌리거나 현재 씬을 재로드하여 완전히 초기화된 상태로 만듭니다.
         // 현재 씬을 다시 로드하는 것이 가장 간단합니다.
-        // 주의: 현재 씬 이름이 무엇인지 확인하고 사용해야 합니다.
         string currentSceneName = SceneManager.GetActiveScene().name;
         SceneManager.LoadScene(currentSceneName);
         Debug.Log($"[ResetManager] 현재 씬 '{currentSceneName}'을(를) 재로드합니다.");

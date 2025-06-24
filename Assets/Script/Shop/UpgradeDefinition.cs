@@ -1,92 +1,83 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
-// Unity ¿¡µğÅÍ¿¡¼­ "Create/Shop/Upgrade Definition" ¸Ş´º¸¦ ÅëÇØ ÀÌ ¿¡¼ÂÀ» »ı¼ºÇÒ ¼ö ÀÖ½À´Ï´Ù.
-// ÀÌ ½ºÅ©¸³ÅÍºí ¿ÀºêÁ§Æ®´Â °ÔÀÓ ³» Æ¯Á¤ ¾ÆÀÌÅÛÀÇ ¾÷±×·¹ÀÌµå °æ·Î¸¦ Á¤ÀÇÇÕ´Ï´Ù.
 [CreateAssetMenu(fileName = "NewUpgradeDefinition", menuName = "Shop/Upgrade Definition")]
 public class UpgradeDefinition : ScriptableObject
 {
-    [Header("¾÷±×·¹ÀÌµå ´ë»ó ¾ÆÀÌÅÛ")]
-    [Tooltip("ÀÌ ¾÷±×·¹ÀÌµå°¡ Àû¿ëµÉ BaseItemData ¿¡¼ÂÀ» ÇÒ´çÇÏ¼¼¿ä. ShopManagerÀÇ upgradeableItemDatas ¸ñ·Ï¿¡ Æ÷ÇÔµÇ¾î¾ß ÇÕ´Ï´Ù.")]
-    public BaseItemData targetItemData; // ÀÌ ¾÷±×·¹ÀÌµå°¡ ¾î¶² BaseItemData¿¡ Àû¿ëµÇ´ÂÁö ÂüÁ¶ÇÕ´Ï´Ù.
+    [Header("ì—…ê·¸ë ˆì´ë“œ ëŒ€ìƒ ì•„ì´í…œ")]
+    [Tooltip("ì´ ì—…ê·¸ë ˆì´ë“œê°€ ì ìš©ë  BaseItemData ì—ì…‹ì„ í• ë‹¹í•˜ì„¸ìš”. ShopManagerì˜ upgradeableItemDatas ëª©ë¡ì— í¬í•¨ë˜ì–´ì•¼ í•©ë‹ˆë‹¤.")]
+    public BaseItemData targetItemData;
 
-    [Header("¾÷±×·¹ÀÌµå ·¹º§º° ºñ¿ë")]
-    [Tooltip("¾÷±×·¹ÀÌµå ·¹º§º° ÇÊ¿äÇÑ °ñµå ºñ¿ë ¸ñ·ÏÀÔ´Ï´Ù. ¸®½ºÆ®ÀÇ ÀÎµ¦½º 0Àº '·¹º§ 0¿¡¼­ ·¹º§ 1·Î ¾÷±×·¹ÀÌµåÇÏ´Â ºñ¿ë'ÀÔ´Ï´Ù. (Max Level±îÁö)")]
-    public List<int> costs; // costs[0] = Level 0 -> Level 1 ºñ¿ë, costs[1] = Level 1 -> Level 2 ºñ¿ë
+    [Header("ì—…ê·¸ë ˆì´ë“œ ë ˆë²¨ë³„ ë¹„ìš©")]
+    [Tooltip("ì—…ê·¸ë ˆì´ë“œ ë ˆë²¨ë³„ í•„ìš”í•œ ê³¨ë“œ ë¹„ìš© ëª©ë¡ì…ë‹ˆë‹¤. ë¦¬ìŠ¤íŠ¸ì˜ ì¸ë±ìŠ¤ 0ì€ 'ë ˆë²¨ 0ì—ì„œ ë ˆë²¨ 1ë¡œ ì—…ê·¸ë ˆì´ë“œí•˜ëŠ” ë¹„ìš©'ì…ë‹ˆë‹¤. (Max Levelê¹Œì§€)")]
+    public List<int> costs;
 
-    [Tooltip("ÀÌ ¾÷±×·¹ÀÌµåÀÇ ÃÖ´ë ·¹º§ÀÔ´Ï´Ù. (·¹º§ 0 Æ÷ÇÔ. ¿¹: Max LevelÀÌ 3ÀÌ¸é ·¹º§ 0, 1, 2, 3±îÁö °¡´ÉÇÕ´Ï´Ù)")]
-    public int maxLevel = 3; // ÀÌ ¾÷±×·¹ÀÌµåÀÇ ÃÖ´ë ·¹º§ (0ºÎÅÍ ½ÃÀÛ)
+    [Tooltip("ì´ ì—…ê·¸ë ˆì´ë“œì˜ ìµœëŒ€ ë ˆë²¨ì…ë‹ˆë‹¤. (ë ˆë²¨ 0 í¬í•¨. ì˜ˆ: Max Levelì´ 3ì´ë©´ ë ˆë²¨ 0, 1, 2, 3ê¹Œì§€ ê°€ëŠ¥í•©ë‹ˆë‹¤)")]
+    public int maxLevel = 3;
 
-    [Header("UI Ç¥½Ã ¼³Á¤")]
-    [Tooltip("»óÁ¡ UI¿¡ Ç¥½ÃµÉ ÀÌ ¾÷±×·¹ÀÌµåÀÇ Á¦¸ñÀÔ´Ï´Ù (¿¹: '½Ã°£ Ãß°¡ ¾ÆÀÌÅÛ È¿À² Áõ°¡').")]
-    public string upgradeTitle; // »óÁ¡ UI¿¡ Ç¥½ÃµÉ Á¦¸ñ
+    [Header("UI í‘œì‹œ ì„¤ì •")]
+    [Tooltip("ìƒì  UIì— í‘œì‹œë  ì´ ì—…ê·¸ë ˆì´ë“œì˜ ì œëª©ì…ë‹ˆë‹¤ (ì˜ˆ: 'ì‹œê°„ ì¶”ê°€ ì•„ì´í…œ íš¨ìœ¨ ì¦ê°€').")]
+    public string upgradeTitle;
 
-    [Tooltip("¾÷±×·¹ÀÌµå È¿°ú¸¦ ¼³¸íÇÏ´Â ÅØ½ºÆ® Çü½ÄÀÔ´Ï´Ù. {0}Àº ÇöÀç ·¹º§ÀÇ °ª, {1}Àº ´ÙÀ½ ·¹º§ÀÇ °ªÀÔ´Ï´Ù.")]
-    public string effectDescriptionFormat; // ¿¹: "½Ã°£ º¸³Ê½º: {0}ÃÊ -> {1}ÃÊ"
+    [Tooltip("ì—…ê·¸ë ˆì´ë“œ íš¨ê³¼ë¥¼ ì„¤ëª…í•˜ëŠ” í…ìŠ¤íŠ¸ í˜•ì‹ì…ë‹ˆë‹¤. {0}ì€ í˜„ì¬ ë ˆë²¨ì˜ ê°’, {1}ì€ ë‹¤ìŒ ë ˆë²¨ì˜ ê°’ì…ë‹ˆë‹¤.")]
+    public string effectDescriptionFormat;
 
     /// <summary>
-    /// ÁöÁ¤µÈ ¸ñÇ¥ ·¹º§·Î ¾÷±×·¹ÀÌµåÇÏ´Â µ¥ ÇÊ¿äÇÑ °ñµå ºñ¿ëÀ» ¹İÈ¯ÇÕ´Ï´Ù.
+    /// íŠ¹ì • ë ˆë²¨ë¡œ ì—…ê·¸ë ˆì´ë“œí•˜ëŠ” ë° í•„ìš”í•œ ê³¨ë“œ ë¹„ìš©ì„ ë°˜í™˜í•©ë‹ˆë‹¤.
     /// </summary>
-    /// <param name="targetLevel">¾÷±×·¹ÀÌµåÇÒ ¸ñÇ¥ ·¹º§ (ÇöÀç ·¹º§ + 1)</param>
-    /// <returns>ÇÊ¿äÇÑ °ñµå ºñ¿ëÀ» ¹İÈ¯ÇÏ°Å³ª, ÇØ´ç ·¹º§ÀÇ ºñ¿ëÀÌ Á¤ÀÇµÇÁö ¾Ê¾ÒÀ¸¸é -1À» ¹İÈ¯ÇÕ´Ï´Ù.</returns>
+    /// <param name="targetLevel">ë„ë‹¬í•˜ë ¤ëŠ” ì—…ê·¸ë ˆì´ë“œ ë ˆë²¨ì…ë‹ˆë‹¤. (ì˜ˆ: ë ˆë²¨ 1ë¡œ ê°€ê¸° ìœ„í•œ ë¹„ìš©ì€ GetCostForLevel(1))</param>
+    /// <returns>í•´ë‹¹ ë ˆë²¨ë¡œì˜ ì—…ê·¸ë ˆì´ë“œ ë¹„ìš© ë˜ëŠ” -1 (ë¹„ìš©ì´ ì •ì˜ë˜ì§€ ì•Šì€ ê²½ìš°).</returns>
     public int GetCostForLevel(int targetLevel)
     {
-        // ºñ¿ë ¸®½ºÆ®´Â 0ºÎÅÍ ½ÃÀÛÇÏ¹Ç·Î targetLevel-1 ÀÎµ¦½º¸¦ »ç¿ëÇÕ´Ï´Ù.
-        // ¿¹¸¦ µé¾î, targetLevel 1 (·¹º§ 0 -> 1)ÀÇ ºñ¿ëÀº costs[0]¿¡ ÀÖ½À´Ï´Ù.
+        // costs ë¦¬ìŠ¤íŠ¸ëŠ” ë ˆë²¨ 1ì˜ ë¹„ìš©ë¶€í„° ì‹œì‘í•˜ë¯€ë¡œ ì¸ë±ìŠ¤ëŠ” targetLevel - 1
         if (targetLevel > 0 && targetLevel <= costs.Count)
         {
             return costs[targetLevel - 1];
         }
-        return -1; // À¯È¿ÇÏÁö ¾Ê°Å³ª Á¤ÀÇµÇÁö ¾ÊÀº ·¹º§
+        return -1; // ìœ íš¨í•˜ì§€ ì•Šì€ ë ˆë²¨
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛÀÇ ÇöÀç ·¹º§¿¡ µû¸¥ È¿°ú °ªÀ» ¹®ÀÚ¿­·Î ¹İÈ¯ÇÕ´Ï´Ù.
-    /// ÀÌ °ªÀº UI¿¡ Ç¥½ÃµÉ ¼ö ÀÖ½À´Ï´Ù.
+    /// í˜„ì¬ ë ˆë²¨ì—ì„œì˜ ì•„ì´í…œ íš¨ê³¼ ê°’ì„ ë¬¸ìì—´ë¡œ ë°˜í™˜í•©ë‹ˆë‹¤.
+    /// PlusTimeItemDataì™€ LightItemDataì˜ ìƒˆë¡œìš´ í•„ë“œë¥¼ ì°¸ì¡°í•©ë‹ˆë‹¤.
     /// </summary>
-    /// <param name="currentLevel">¾ÆÀÌÅÛÀÇ ÇöÀç ¾÷±×·¹ÀÌµå ·¹º§ÀÔ´Ï´Ù.</param>
-    /// <returns>ÇöÀç ·¹º§¿¡¼­ÀÇ ¾ÆÀÌÅÛ È¿°ú¸¦ ³ªÅ¸³»´Â ¹®ÀÚ¿­ÀÔ´Ï´Ù.</returns>
+    /// <param name="currentLevel">ì•„ì´í…œì˜ í˜„ì¬ ì—…ê·¸ë ˆì´ë“œ ë ˆë²¨ì…ë‹ˆë‹¤.</param>
+    /// <returns>ì•„ì´í…œì˜ í˜„ì¬ íš¨ê³¼ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ë¬¸ìì—´ì…ë‹ˆë‹¤.</returns>
     public string GetCurrentEffectValueString(int currentLevel)
     {
-        // ´ë»ó ¾ÆÀÌÅÛ µ¥ÀÌÅÍÀÇ ½ÇÁ¦ Å¸ÀÔÀ» È®ÀÎÇÏ¿© ÇØ´ç Å¸ÀÔÀÇ °íÀ¯ÇÑ È¿°ú¸¦ °¡Á®¿É´Ï´Ù.
         if (targetItemData is PlusTimeItemData plusTimeData)
         {
-            // PlusTimeItemDataÀÇ GetEffectiveTimeToAdd ¸Ş¼­µå¸¦ »ç¿ëÇÏ¿© ÇöÀç ·¹º§ÀÇ ½Ã°£ º¸³Ê½º¸¦ °¡Á®¿É´Ï´Ù.
-            return $"{plusTimeData.GetEffectiveTimeToAdd(currentLevel)}ÃÊ";
+            // â¬‡ï¸ [ìˆ˜ì •] timeToAdd ëŒ€ì‹  GetEffectiveTimeToAdd ë©”ì„œë“œ í˜¸ì¶œ
+            return $"{plusTimeData.GetEffectiveTimeToAdd(currentLevel):F0}ì´ˆ"; // ì†Œìˆ˜ì  ì—†ì´ í‘œì‹œ
         }
         if (targetItemData is LightItemData lightData)
         {
-            // LightItemDataÀÇ GetEffectiveTargetScaleMultiplier ¸Ş¼­µå¸¦ »ç¿ëÇÏ¿© ÇöÀç ·¹º§ÀÇ ½ºÄÉÀÏ ¹èÀ²À» °¡Á®¿É´Ï´Ù.
-            // ¿©±â¼­´Â Vector3ÀÇ x °ªÀ» ´ëÇ¥·Î »ç¿ëÇÏ°í ¼Ò¼öÁ¡ ÇÑ ÀÚ¸®±îÁö Ç¥½ÃÇÕ´Ï´Ù.
-            return $"{lightData.GetEffectiveTargetScaleMultiplier(currentLevel).x:F1}¹è";
+            // â¬‡ï¸ [ìˆ˜ì •] targetScaleMultiplier ëŒ€ì‹  GetEffectiveTargetScaleMultiplier ë©”ì„œë“œ í˜¸ì¶œ
+            return $"{lightData.GetEffectiveTargetScaleMultiplier(currentLevel).x:F1}ë°°"; // ì†Œìˆ˜ì  ì²«ì§¸ ìë¦¬ê¹Œì§€ í‘œì‹œ
         }
-        // ¾÷±×·¹ÀÌµå ´ë»ó ¾ÆÀÌÅÛÀÌ Á¤ÀÇµÇÁö ¾Ê¾Ò°Å³ª Áö¿øµÇÁö ¾Ê´Â Å¸ÀÔÀÏ °æ¿ì.
-        return "¾Ë ¼ö ¾øÀ½";
+        return "ì•Œ ìˆ˜ ì—†ìŒ"; // ì •ì˜ë˜ì§€ ì•Šì€ BaseItemData íƒ€ì…
     }
 
     /// <summary>
-    /// ¾ÆÀÌÅÛÀÇ ´ÙÀ½ ·¹º§¿¡ µû¸¥ ¿¹»ó È¿°ú °ªÀ» ¹®ÀÚ¿­·Î ¹İÈ¯ÇÕ´Ï´Ù.
-    /// ÀÌ °ªÀº UI¿¡ Ç¥½ÃµÉ ¼ö ÀÖ½À´Ï´Ù.
+    /// ë‹¤ìŒ ë ˆë²¨ì—ì„œì˜ ì•„ì´í…œ íš¨ê³¼ ê°’ì„ ë¬¸ìì—´ë¡œ ë°˜í™˜í•©ë‹ˆë‹¤.
+    /// PlusTimeItemDataì™€ LightItemDataì˜ ìƒˆë¡œìš´ í•„ë“œë¥¼ ì°¸ì¡°í•©ë‹ˆë‹¤.
     /// </summary>
-    /// <param name="currentLevel">¾ÆÀÌÅÛÀÇ ÇöÀç ¾÷±×·¹ÀÌµå ·¹º§ÀÔ´Ï´Ù.</param>
-    /// <returns>´ÙÀ½ ·¹º§¿¡¼­ÀÇ ¾ÆÀÌÅÛ È¿°ú¸¦ ³ªÅ¸³»´Â ¹®ÀÚ¿­ÀÔ´Ï´Ù. ÃÖ´ë ·¹º§ÀÎ °æ¿ì "ÃÖ´ë"¸¦ ¹İÈ¯ÇÕ´Ï´Ù.</returns>
+    /// <param name="currentLevel">ì•„ì´í…œì˜ í˜„ì¬ ì—…ê·¸ë ˆì´ë“œ ë ˆë²¨ì…ë‹ˆë‹¤.</param>
+    /// <returns>ì•„ì´í…œì˜ ë‹¤ìŒ ë ˆë²¨ íš¨ê³¼ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ë¬¸ìì—´ì…ë‹ˆë‹¤.</returns>
     public string GetNextEffectValueString(int currentLevel)
     {
-        // ÀÌ¹Ì ÃÖ´ë ·¹º§¿¡ µµ´ŞÇß´Ù¸é "ÃÖ´ë"¸¦ ¹İÈ¯ÇÕ´Ï´Ù.
-        if (currentLevel >= maxLevel) return "ÃÖ´ë";
+        if (currentLevel >= maxLevel) return "ìµœëŒ€"; // ì´ë¯¸ ìµœëŒ€ ë ˆë²¨ì¸ ê²½ìš°
 
-        // ´ë»ó ¾ÆÀÌÅÛ µ¥ÀÌÅÍÀÇ ½ÇÁ¦ Å¸ÀÔÀ» È®ÀÎÇÏ¿© ÇØ´ç Å¸ÀÔÀÇ °íÀ¯ÇÑ ´ÙÀ½ È¿°ú¸¦ °¡Á®¿É´Ï´Ù.
         if (targetItemData is PlusTimeItemData plusTimeData)
         {
-            // PlusTimeItemDataÀÇ GetEffectiveTimeToAdd ¸Ş¼­µå¸¦ »ç¿ëÇÏ¿© ´ÙÀ½ ·¹º§ÀÇ ½Ã°£ º¸³Ê½º¸¦ °¡Á®¿É´Ï´Ù.
-            return $"{plusTimeData.GetEffectiveTimeToAdd(currentLevel + 1)}ÃÊ";
+            // â¬‡ï¸ [ìˆ˜ì •] timeToAdd ëŒ€ì‹  GetEffectiveTimeToAdd ë©”ì„œë“œ í˜¸ì¶œ
+            return $"{plusTimeData.GetEffectiveTimeToAdd(currentLevel + 1):F0}ì´ˆ"; // ì†Œìˆ˜ì  ì—†ì´ í‘œì‹œ
         }
         if (targetItemData is LightItemData lightData)
         {
-            // LightItemDataÀÇ GetEffectiveTargetScaleMultiplier ¸Ş¼­µå¸¦ »ç¿ëÇÏ¿© ´ÙÀ½ ·¹º§ÀÇ ½ºÄÉÀÏ ¹èÀ²À» °¡Á®¿É´Ï´Ù.
-            return $"{lightData.GetEffectiveTargetScaleMultiplier(currentLevel + 1).x:F1}¹è";
+            // â¬‡ï¸ [ìˆ˜ì •] targetScaleMultiplier ëŒ€ì‹  GetEffectiveTargetScaleMultiplier ë©”ì„œë“œ í˜¸ì¶œ
+            return $"{lightData.GetEffectiveTargetScaleMultiplier(currentLevel + 1).x:F1}ë°°"; // ì†Œìˆ˜ì  ì²«ì§¸ ìë¦¬ê¹Œì§€ í‘œì‹œ
         }
-        // ¾÷±×·¹ÀÌµå ´ë»ó ¾ÆÀÌÅÛÀÌ Á¤ÀÇµÇÁö ¾Ê¾Ò°Å³ª Áö¿øµÇÁö ¾Ê´Â Å¸ÀÔÀÏ °æ¿ì.
-        return "¾Ë ¼ö ¾øÀ½";
+        return "ì•Œ ìˆ˜ ì—†ìŒ"; // ì •ì˜ë˜ì§€ ì•Šì€ BaseItemData íƒ€ì…
     }
 }

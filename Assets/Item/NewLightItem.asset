@@ -12,10 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25e25176fff90054ea4024d1242e3b75, type: 3}
   m_Name: NewLightItem
   m_EditorClassIdentifier: 
-  itemName: Light Item
+  itemName: "\uBE5B\uC544\uC774\uD15C"
+  itemDescription: Item Description
   icon: {fileID: 21300000, guid: 323695bdbce3d824bab5ab7011cb2ce4, type: 3}
-  baseTargetScaleMultiplier: {x: 1.5, y: 1.5, z: 1.5}
-  scaleMultiplierPerLevel: 0.1
-  scaleHoldDuration: 5
-  point: 0
-  targetObjectNameForEffect: CameraLight
+  targetLightObject: {fileID: 0}

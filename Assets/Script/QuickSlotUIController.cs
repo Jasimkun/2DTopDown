@@ -3,137 +3,202 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+[System.Serializable]
+public class QuickSlotUI
+{
+    public Button currentButton;
+    public Image currentImage;
+    public TextMeshProUGUI currentText;
+}
+
 public class QuickSlotUIController : MonoBehaviour
 {
+    public static QuickSlotUIController Instance { get; private set; }
+
     public QuickSlotUI[] quickSlots;
-    public Sprite defaultSlotSprite; // ⬇️ 이 필드에 스프라이트가 할당되어야 합니다.
+    public Sprite defaultSlotSprite;
+
+    // ****** 오타 수정 완료: 'Use' 대문자 ******
+    private InventorySystem.InventoryItem[] quickSlotsInUse;
+
+    void Awake()
+    {
+        Debug.Log("[QuickSlotUIController] Awake 호출됨. GameObject 이름: " + gameObject.name);
+
+        if (Instance == null)
+        {
+            Instance = this;
+            // DontDestroyOnLoad(gameObject); // 이 부분은 InventoryManager 스크립트에서 처리하는 것이 더 안전합니다.
+            // 또는 이 스크립트가 붙은 GameObject를 DontDestroyOnLoad에 직접 자식으로 두세요.
+
+            Debug.Log("[QuickSlotUIController] QuickSlotUIController 인스턴스 설정 완료.");
+
+            // quickSlots 배열의 길이를 기준으로 quickSlotsInUse 배열 초기화
+            if (quickSlots != null)
+            {
+                quickSlotsInUse = new InventorySystem.InventoryItem[quickSlots.Length];
+            }
+            else
+            {
+                Debug.LogError("[QuickSlotUIController] quickSlots 배열이 null입니다! Inspector에서 Quick Slots 배열을 설정해주세요.");
+                quickSlotsInUse = new InventorySystem.InventoryItem[0]; // 안전 장치
+            }
+        }
+        else if (Instance != this)
+        {
+            Debug.LogWarning("[QuickSlotUIController] 중복 인스턴스 발견! 이 오브젝트를 파괴합니다. (기존 인스턴스 이름: " + Instance.gameObject.name + ", 새로 생긴 인스턴스 이름: " + gameObject.name + ")");
+            Destroy(gameObject);
+            return;
+        }
+    }
 
     void Start()
     {
-        Debug.Log("[QuickSlotUI] Start 메서드 시작. UI 갱신.");
+        Debug.Log("[QuickSlotUIController] Start 호출됨. GameObject 이름: " + gameObject.name);
+        if (defaultSlotSprite == null)
+            Debug.LogWarning("[QuickSlotUIController] 기본 슬롯 스프라이트가 할당되지 않았습니다.");
+
+        Canvas parentCanvas = FindObjectOfType<Canvas>();
+        if (parentCanvas != null && transform.parent != parentCanvas.transform)
+        {
+            // Canvas가 부모가 아니면 Canvas의 자식으로 설정 (UI가 보이도록)
+            transform.SetParent(parentCanvas.transform, false);
+            Debug.Log("[QuickSlotUIController] ItemSlotsPanel을 새 Canvas에 재부모화했습니다.");
+        }
+        else if (parentCanvas == null)
+        {
+            Debug.LogWarning("[QuickSlotUIController] 현재 씬에서 Canvas를 찾을 수 없습니다. ItemSlotsPanel이 표시되지 않을 수 있습니다.");
+        }
+
         RefreshQuickSlotsUI();
+    }
+
+    public void AssignItemToSpecificQuickSlot(InventorySystem.InventoryItem itemToAssign)
+    {
+        if (itemToAssign == null || string.IsNullOrEmpty(itemToAssign.itemName))
+        {
+            Debug.LogWarning("[QuickSlotUIController] 할당하려는 아이템이 null이거나 이름이 비어있습니다.");
+            return;
+        }
+
+        int targetSlotIndex = -1;
+
+        // 중요: 이 문자열은 BaseItemData의 Item Name 필드와 정확히 일치해야 합니다. (띄어쓰기 포함 여부 확인)
+        // 사용자 이미지(image_a36f7e.png)에 따르면 "빛아이템" (띄어쓰기 없음)으로 설정되어 있습니다.
+        if (itemToAssign.itemName == "시간아이템")
+        {
+            targetSlotIndex = 0;
+        }
+        else if (itemToAssign.itemName == "빛아이템")
+        {
+            targetSlotIndex = 1;
+        }
+        // 다른 고정 아이템이 있다면 여기에 else if로 추가하세요.
+
+        if (targetSlotIndex != -1 && targetSlotIndex < quickSlotsInUse.Length) // 인덱스 범위 체크 추가
+        {
+            quickSlotsInUse[targetSlotIndex] = itemToAssign; // 여기에 아이템이 할당됨
+            Debug.Log($"[QuickSlotUIController] {itemToAssign.itemName}이(가) 고정된 퀵슬롯 {targetSlotIndex}에 할당되었습니다.");
+            RefreshQuickSlotsUI(); // 할당 후 UI 갱신 요청
+        }
+        else
+        {
+            Debug.LogWarning($"[QuickSlotUIController] {itemToAssign.itemName}을(를) 위한 고정 퀵슬롯 인덱스를 찾을 수 없거나 슬롯 범위를 벗어났습니다. 슬롯 개수: {quickSlotsInUse.Length}, 시도된 인덱스: {targetSlotIndex}. 아이템 이름 확인: '{itemToAssign.itemName}'");
+        }
     }
 
     public void RefreshQuickSlotsUI()
     {
-        Debug.Log("[QuickSlotUI] RefreshQuickSlotsUI 메서드 시작.");
-
-        if (InventorySystem.Instance == null)
-        {
-            Debug.LogWarning("InventorySystem.Instance가 없습니다. 퀵 슬롯 UI를 갱신할 수 없습니다.");
-            return;
-        }
-
-        List<InventoryItem> inventoryItems = InventorySystem.Instance.items;
-        Debug.Log($"[QuickSlotUI] 현재 인벤토리 아이템 개수: {inventoryItems.Count}");
-
         for (int i = 0; i < quickSlots.Length; i++)
         {
-            QuickSlotUI currentSlot = quickSlots[i];
-            Debug.Log($"\n[QuickSlotUI] --- 슬롯 {i} 처리 중 ---");
-
-            // UI 요소 할당 확인 (기존 로직)
-            if (currentSlot.currentImage == null || currentSlot.currentText == null || currentSlot.currentButton == null)
+            QuickSlotUI slot = quickSlots[i];
+            if (slot == null)
             {
-                Debug.LogError($"[QuickSlotUI] 오류: 퀵 슬롯 {i}의 버튼/이미지/텍스트 컴포넌트 중 하나가 누락되었습니다. Inspector에서 할당해주세요!");
-                if (currentSlot.currentImage != null) currentSlot.currentImage.sprite = defaultSlotSprite;
-                if (currentSlot.currentImage != null) currentSlot.currentImage.color = Color.gray;
-                if (currentSlot.currentText != null) currentSlot.currentText.text = "오류";
-                if (currentSlot.currentButton != null) currentSlot.currentButton.interactable = false;
+                Debug.LogWarning($"[QuickSlotUIController] QuickSlots 배열의 Element {i}가 null입니다. Inspector를 확인해주세요.");
                 continue;
             }
 
-            Debug.Log($"[QuickSlotUI] 슬롯 {i} - Button Instance ID: {currentSlot.currentButton.GetInstanceID()}");
-            Debug.Log($"[QuickSlotUI] 슬롯 {i} - Image Instance ID: {currentSlot.currentImage.GetInstanceID()}");
-            Debug.Log($"[QuickSlotUI] 슬롯 {i} - Text Instance ID: {currentSlot.currentText.GetInstanceID()}");
-
-            currentSlot.currentButton.onClick.RemoveAllListeners();
-
-            BaseItemData requiredItemData = currentSlot.requiredItemData;
-
-            if (requiredItemData == null)
+            if (slot.currentButton == null || slot.currentImage == null || slot.currentText == null)
             {
-                Debug.LogWarning($"[QuickSlotUI] 슬롯 {i}에 'Required Item Data'가 할당되지 않았습니다. 빈 슬롯으로 처리합니다.");
-                currentSlot.currentImage.sprite = defaultSlotSprite;
-                currentSlot.currentImage.color = Color.gray;
-                currentSlot.currentText.text = "";
-                currentSlot.currentButton.interactable = false;
+                Debug.LogError($"[QuickSlotUIController] 슬롯 {i}의 UI 컴포넌트(버튼, 이미지, 텍스트) 중 일부가 누락되었습니다. Inspector를 확인해주세요.");
+                SetDefaultQuickSlotUI(slot, "UI 오류", false);
                 continue;
             }
 
-            InventoryItem invItem = inventoryItems.Find(item => item.itemName == requiredItemData.itemName);
+            slot.currentButton.onClick.RemoveAllListeners();
 
-            if (invItem != null)
+            if (i < quickSlotsInUse.Length && quickSlotsInUse[i] != null)
             {
-                Debug.Log($"[QuickSlotUI] 슬롯 {i}: 인벤토리 아이템 '{invItem.itemName}' (Required: '{requiredItemData.itemName}'). Used In Scene: {invItem.usedInCurrentScene}");
+                InventorySystem.InventoryItem item = quickSlotsInUse[i];
+                BaseItemData itemData = item.itemData;
 
-                currentSlot.currentImage.sprite = requiredItemData.icon; // ⬇️ 여기에서 아이템의 아이콘을 할당합니다.
+                Debug.Log($"[QuickSlotUIController Debug] Slot {i}: Item Name='{item.itemName}', BaseItemData is {(itemData != null ? "NOT NULL" : "NULL")}. Icon is {(itemData != null && itemData.icon != null ? itemData.icon.name : "NULL")}.");
 
-                // ⬇️ [핵심] 아이콘이 없거나 defaultSprite도 없을 때 투명하게 만드는 로직
-                if (currentSlot.currentImage.sprite == null)
+                if (itemData != null && itemData.icon != null)
                 {
-                    Debug.LogWarning($"[QuickSlotUI] 아이템 '{requiredItemData.itemName}'의 아이콘이 null입니다! defaultSlotSprite 사용 시도.");
-                    currentSlot.currentImage.sprite = defaultSlotSprite; // defaultSlotSprite 할당 시도
-                }
+                    slot.currentImage.sprite = itemData.icon;
+                    slot.currentImage.color = item.usedInCurrentScene ? Color.gray : Color.white;
+                    slot.currentText.text = item.usedInCurrentScene ? "USED" : item.count.ToString();
+                    slot.currentButton.interactable = !item.usedInCurrentScene;
 
-                if (currentSlot.currentImage.sprite == null) // ⬇️ 여전히 null이면 심각한 오류, 투명하게 만듭니다.
-                {
-                    Debug.LogError($"[QuickSlotUI] 심각: 아이템 '{requiredItemData.itemName}'의 아이콘과 defaultSlotSprite 모두 null입니다. 이미지가 표시될 수 없습니다.");
-                    currentSlot.currentImage.color = Color.clear; // 이미지를 투명하게 만들어 사라지게 함
-                }
-                else // ⬇️ 스프라이트가 성공적으로 할당되었다면 정상적인 색상 로직 적용
-                {
-                    currentSlot.currentImage.color = Color.white; // 기본적으로 하얀색 (투명하지 않음)
-                }
-
-
-                if (invItem.usedInCurrentScene)
-                {
-                    currentSlot.currentImage.color = Color.gray; // ⬇️ 사용 시 회색으로 변경
-                    currentSlot.currentText.text = "USED";
-                    currentSlot.currentButton.interactable = false;
-                    Debug.Log($"[QuickSlotUI] 슬롯 {i} ({requiredItemData.itemName}): 이번 씬에서 사용됨. UI 회색, 텍스트 'USED', 버튼 비활성화.");
+                    int slotIndex = i; // 클로저를 위한 로컬 변수
+                    slot.currentButton.onClick.AddListener(() =>
+                    {
+                        InventorySystem.Instance?.UseInventoryItem(quickSlotsInUse[slotIndex]);
+                    });
                 }
                 else
                 {
-                    currentSlot.currentImage.color = Color.white; // ⬇️ 사용하지 않았으면 흰색 유지
-                    currentSlot.currentText.text = invItem.count.ToString();
-                    currentSlot.currentButton.interactable = true;
-
-                    int actualInventoryIndex = InventorySystem.Instance.items.FindIndex(item => item.itemName == requiredItemData.itemName);
-                    if (actualInventoryIndex != -1)
-                    {
-                        currentSlot.currentButton.onClick.AddListener(() => InventorySystem.Instance.UseInventoryItem(actualInventoryIndex));
-                        Debug.Log($"[QuickSlotUI] 슬롯 {i} ({requiredItemData.itemName}): UseInventoryItem({actualInventoryIndex}) 리스너 추가됨.");
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[QuickSlotUI] 슬롯 {i} ({requiredItemData.itemName}): 인벤토리에서 아이템의 실제 인덱스를 찾을 수 없습니다! 버튼 비활성화.");
-                        currentSlot.currentButton.interactable = false;
-                    }
+                    Debug.LogWarning($"[QuickSlotUIController] 슬롯 {i}의 아이템({item.itemName})에 할당된 BaseItemData 또는 아이콘이 없어 UI를 표시할 수 없습니다. (저장명: {item.itemDataName})");
+                    SetDefaultQuickSlotUI(slot, "데이터 오류", false);
                 }
-                Debug.Log($"[QuickSlotUI] 슬롯 {i} ({requiredItemData.itemName}) 최종 스프라이트: {currentSlot.currentImage.sprite?.name ?? "없음"}, 최종 색상: {currentSlot.currentImage.color}, 최종 텍스트: '{currentSlot.currentText.text}', 버튼 인터랙터블: {currentSlot.currentButton.interactable}");
-
             }
-            else // 인벤토리에 이 아이템이 없다면 (빈 슬롯 처리)
+            else
             {
-                currentSlot.currentImage.sprite = defaultSlotSprite;
-                currentSlot.currentImage.color = Color.gray; // 없으면 회색 (투명하지 않음)
-                currentSlot.currentText.text = "";
-                currentSlot.currentButton.interactable = false;
-                Debug.Log($"[QuickSlotUI] 슬롯 {i} ({requiredItemData.itemName}): 인벤토리에 없음. 빈 슬롯으로 설정됨.");
+                SetDefaultQuickSlotUI(slot, "", false); // 아이템이 없는 슬롯은 기본으로
             }
         }
-        Debug.Log("[QuickSlotUI] RefreshQuickSlotsUI 메서드 완료.");
     }
 
-    [System.Serializable]
-    public class QuickSlotUI
+    private void SetDefaultQuickSlotUI(QuickSlotUI slot, string text, bool interactable)
     {
-        public Button currentButton;
-        public Image currentImage;
-        public TextMeshProUGUI currentText;
-        [Tooltip("이 퀵슬롯에 고정적으로 표시될 BaseItemData 에셋을 할당하세요. (예: PlusTimeItemData)")]
-        public BaseItemData requiredItemData;
+        if (slot.currentImage != null)
+        {
+            slot.currentImage.sprite = defaultSlotSprite; // 기본 스프라이트 사용
+            slot.currentImage.color = Color.gray; // 기본 색상
+        }
+        if (slot.currentText != null)
+            slot.currentText.text = text;
+        if (slot.currentButton != null)
+        {
+            slot.currentButton.interactable = interactable;
+            slot.currentButton.onClick.RemoveAllListeners();
+        }
+    }
+
+    public void ClearAllQuickSlotsUI()
+    {
+        for (int i = 0; i < quickSlotsInUse.Length; i++)
+        {
+            quickSlotsInUse[i] = null;
+        }
+        RefreshQuickSlotsUI();
+        Debug.Log("[QuickSlotUIController] 모든 퀵슬롯 UI가 초기화되었습니다.");
+    }
+
+    public void RemoveItemFromQuickSlot(InventorySystem.InventoryItem itemToRemove)
+    {
+        if (itemToRemove == null) return;
+
+        for (int i = 0; i < quickSlotsInUse.Length; i++)
+        {
+            if (quickSlotsInUse[i] == itemToRemove)
+            {
+                quickSlotsInUse[i] = null;
+                Debug.Log($"[QuickSlotUIController] 퀵슬롯 {i}에서 '{itemToRemove.itemName}' 제거.");
+                RefreshQuickSlotsUI();
+                return;
+            }
+        }
     }
 }
