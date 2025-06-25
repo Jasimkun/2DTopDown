@@ -94,7 +94,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3542247808534430479}
   - component: {fileID: 570201236782076373}
-  - component: {fileID: 5254153533328631963}
+  - component: {fileID: 1242926537108466766}
   - component: {fileID: -4940075899410057224}
   m_Layer: 0
   m_Name: NewLightItem
@@ -171,7 +171,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &5254153533328631963
+--- !u!114 &1242926537108466766
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -180,11 +180,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 6034082990051690206}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf82ae69f1e313a47b25012a285712c5, type: 3}
+  m_Script: {fileID: 11500000, guid: e7dedf414aadbee4a9a98dd4fbdb90fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemName: "\uBE5B\uC544\uC774\uD15C"
-  data: {fileID: 11400000, guid: 8e4b8035221152a49a90da3d34b81b02, type: 2}
+  itemDataToAcquire: {fileID: 11400000, guid: 526d2ddf3e364ba41b849385518c612b, type: 2}
 --- !u!61 &-4940075899410057224
 BoxCollider2D:
   m_ObjectHideFlags: 0

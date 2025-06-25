@@ -14,7 +14,7 @@ public class PlusTimeItem : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            InventorySystem inventory = FindObjectOfType<InventorySystem>();
+            InventorySystem_1 inventory = FindObjectOfType<InventorySystem_1>();
             if (inventory != null)
             {
                 InventoryItem newItem = new InventoryItem
